@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>兼职任务查询案例</title>
+  <style>
+    :root {
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --brand: #2563eb;
+      --brand-soft: #eff6ff;
+      --ok: #16a34a;
+      --warn: #d97706;
+      --bad: #dc2626;
+      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
+      --radius: 18px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+      background: radial-gradient(circle at top left, #e0edff, transparent 28rem), var(--bg);
+      color: var(--text);
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 18px 48px; }
+    header {
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
+      margin-bottom: 20px;
+    }
+    h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; }
+    .sub { color: var(--muted); margin: 0; line-height: 1.65; }
+    .pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px;
+      background: rgba(255,255,255,.72); color: var(--muted); white-space: nowrap;
+      font-size: 13px;
+    }
+    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }
+    .card {
+      background: rgba(255,255,255,.86); border: 1px solid rgba(229,231,235,.9);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
+      backdrop-filter: blur(8px);
+    }
+    .metric .label { color: var(--muted); font-size: 13px; }
+    .metric .num { font-size: 30px; font-weight: 800; margin-top: 8px; letter-spacing: -0.04em; }
+    .toolbar { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 10px; align-items: end; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px 2px; }
+    input, select {
+      width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px;
+      background: #fff; color: var(--text); outline: none; font-size: 14px;
+    }
+    input:focus, select:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
+    button {
+      border: 0; border-radius: 14px; padding: 11px 14px; cursor: pointer;
+      font-weight: 700; background: var(--brand); color: white;
+    }
+    button.secondary { background: #fff; color: var(--text); border: 1px solid var(--line); }
+    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 10px; color: var(--muted); }
+    .table-card { overflow: hidden; padding: 0; }
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; min-width: 1050px; }
+    th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 14px; }
+    th { background: #f9fafb; color: #374151; font-size: 12px; position: sticky; top: 0; z-index: 1; }
+    tr:hover td { background: #fafcff; }
+    .status {
+      display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700;
+      background: #f3f4f6; color: #374151; white-space: nowrap;
+    }
+    .status.done { background: #ecfdf5; color: var(--ok); }
+    .status.work { background: #fff7ed; color: var(--warn); }
+    .status.fail { background: #fef2f2; color: var(--bad); }
+    .task { font-weight: 750; max-width: 320px; }
+    .muted { color: var(--muted); }
+    .empty { padding: 36px; text-align: center; color: var(--muted); }
+    .hint { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
+    @media (max-width: 900px) {
+      header { display: block; }
+      .pill { margin-top: 14px; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .toolbar { grid-template-columns: 1fr 1fr; }
+      .toolbar > div:first-child { grid-column: 1 / -1; }
+    }
+    @media (max-width: 560px) {
+      .grid, .toolbar { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>兼职任务查询案例</h1>
+        <p class="sub">数据来自 <code>data.json</code>。可以按任务ID、任务名称、兼职、学科、年级、状态等快速查询。</p>
+      </div>
+      <div class="pill" id="lastUpdate">读取数据中...</div>
+    </header>
+
+    <section class="grid">
+      <div class="card metric"><div class="label">任务总数</div><div class="num" id="mTotal">-</div></div>
+      <div class="card metric"><div class="label">已完成</div><div class="num" id="mDone">-</div></div>
+      <div class="card metric"><div class="label">分配成功</div><div class="num" id="mAssigned">-</div></div>
+      <div class="card metric"><div class="label">兼职人数</div><div class="num" id="mPeople">-</div></div>
+    </section>
+
+    <section class="card">
+      <div class="toolbar">
+        <div>
+          <label for="q">关键词</label>
+          <input id="q" placeholder="输入任务ID、名称、兼职、商家、需求ID..." autocomplete="off" />
+        </div>
+        <div>
+          <label for="partTimer">兼职</label>
+          <select id="partTimer"><option value="">全部兼职</option></select>
+        </div>
+        <div>
+          <label for="subject">学科</label>
+          <select id="subject"><option value="">全部学科</option></select>
+        </div>
+        <div>
+          <label for="grade">年级</label>
+          <select id="grade"><option value="">全部年级</option></select>
+        </div>
+        <div>
+          <label for="status">制作状态</label>
+          <select id="status"><option value="">全部状态</option></select>
+        </div>
+      </div>
+      <div class="actions">
+        <button id="btnSearch">查询</button>
+        <button class="secondary" id="btnReset">重置</button>
+        <button class="secondary" id="btnExport">导出当前结果 CSV</button>
+      </div>
+      <p class="hint">上线后只需要替换同目录的 <code>data.json</code>，页面会自动读取新数据；不需要改 HTML。</p>
+    </section>
+
+    <div class="result-head">
+      <div id="countText">共 0 条</div>
+      <div class="muted">示例字段已做筛选，避免把原表全部字段直接暴露到前台。</div>
+    </div>
+
+    <section class="card table-card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>任务ID</th>
+              <th>任务名称</th>
+              <th>兼职</th>
+              <th>状态</th>
+              <th>学科/年级</th>
+              <th>题量</th>
+              <th>交付日期</th>
+              <th>创建/质检</th>
+              <th>商家</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <div id="empty" class="empty" hidden>没有匹配的数据</div>
+    </section>
+  </div>
+
+  <script>
+    let allData = [];
+    let current = [];
+
+    const $ = (id) => document.getElementById(id);
+    const text = (value) => value === undefined || value === null || value === '' ? '-' : String(value);
+
+    function statusClass(value) {
+      const v = String(value || '');
+      if (v.includes('完成') || v.includes('成功')) return 'done';
+      if (v.includes('失败') || v.includes('驳回')) return 'fail';
+      if (v.includes('排版') || v.includes('等待') || v.includes('分配中')) return 'work';
+      return '';
+    }
+
+    function optionList(key) {
+      return [...new Set(allData.map(x => x[key]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'zh-Hans-CN'));
+    }
+
+    function fillSelect(id, key, label) {
+      const el = $(id);
+      el.innerHTML = `<option value="">${label}</option>`;
+      optionList(key).forEach(v => {
+        const opt = document.createElement('option');
+        opt.value = v;
+        opt.textContent = v;
+        el.appendChild(opt);
+      });
+    }
+
+    function renderMetrics(data) {
+      $('mTotal').textContent = data.length;
+      $('mDone').textContent = data.filter(x => String(x.productionStatus).includes('完成')).length;
+      $('mAssigned').textContent = data.filter(x => String(x.allocationStatus).includes('分配成功')).length;
+      $('mPeople').textContent = new Set(data.map(x => x.partTimer).filter(x => x && x !== '未分配')).size;
+    }
+
+    function matchKeyword(item, q) {
+      if (!q) return true;
+      const haystack = [
+        item.taskId, item.mainTaskId, item.taskName, item.taskType, item.partTimer,
+        item.creator, item.reviewer, item.subject, item.grade, item.productionStatus,
+        item.allocationStatus, item.merchantMain, item.merchantSub, item.requirementId
+      ].join(' ').toLowerCase();
+      return haystack.includes(q.toLowerCase());
+    }
+
+    function applyFilters() {
+      const q = $('q').value.trim();
+      const partTimer = $('partTimer').value;
+      const subject = $('subject').value;
+      const grade = $('grade').value;
+      const status = $('status').value;
+      current = allData.filter(item => {
+        return matchKeyword(item, q)
+          && (!partTimer || item.partTimer === partTimer)
+          && (!subject || item.subject === subject)
+          && (!grade || item.grade === grade)
+          && (!status || item.productionStatus === status);
+      });
+      renderTable(current);
+      renderMetrics(current);
+    }
+
+    function td(content, className = '') {
+      const cell = document.createElement('td');
+      if (className) cell.className = className;
+      if (content instanceof Node) cell.appendChild(content);
+      else cell.textContent = text(content);
+      return cell;
+    }
+
+    function renderTable(data) {
+      const body = $('tbody');
+      body.innerHTML = '';
+      $('countText').textContent = `共 ${data.length} 条`;
+      $('empty').hidden = data.length !== 0;
+
+      data.forEach(item => {
+        const tr = document.createElement('tr');
+        const task = document.createElement('div');
+        task.className = 'task';
+        task.textContent = text(item.taskName);
+        const sub = document.createElement('div');
+        sub.className = 'muted';
+        sub.textContent = [item.taskType, item.requirementId ? `需求 ${item.requirementId}` : ''].filter(Boolean).join(' · ');
+        const taskWrap = document.createElement('div');
+        taskWrap.append(task, sub);
+
+        const status = document.createElement('div');
+        status.innerHTML = `
+          <span class="status ${statusClass(item.productionStatus)}"></span>
+          <span class="status ${statusClass(item.allocationStatus)}" style="margin-left:6px"></span>`;
+        status.children[0].textContent = text(item.productionStatus);
+        status.children[1].textContent = text(item.allocationStatus);
+
+        tr.append(
+          td(item.taskId),
+          td(taskWrap),
+          td(item.partTimer),
+          td(status),
+          td(`${text(item.subject)} / ${text(item.grade)}`),
+          td(item.quantity),
+          td(item.dueDate || item.videoDueDate),
+          td(`${text(item.creator)} / ${text(item.reviewer)}`),
+          td(item.merchantSub || item.merchantMain)
+        );
+        body.appendChild(tr);
+      });
+    }
+
+    function downloadCSV() {
+      const headers = ['任务ID','任务名称','兼职','制作状态','分配状态','学科','年级','题量','交付日期','创建人','质检人','商家'];
+      const rows = current.map(x => [x.taskId,x.taskName,x.partTimer,x.productionStatus,x.allocationStatus,x.subject,x.grade,x.quantity,x.dueDate || x.videoDueDate,x.creator,x.reviewer,x.merchantSub || x.merchantMain]);
+      const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '兼职任务查询结果.csv';
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    async function init() {
+      try {
+        const res = await fetch('data.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('data.json 读取失败');
+        allData = await res.json();
+        current = [...allData];
+        fillSelect('partTimer', 'partTimer', '全部兼职');
+        fillSelect('subject', 'subject', '全部学科');
+        fillSelect('grade', 'grade', '全部年级');
+        fillSelect('status', 'productionStatus', '全部状态');
+        renderMetrics(current);
+        renderTable(current);
+        $('lastUpdate').textContent = `已载入 ${allData.length} 条数据 · ${new Date().toLocaleString('zh-CN')}`;
+      } catch (err) {
+        $('lastUpdate').textContent = '无法直接读取 data.json';
+        $('empty').hidden = false;
+        $('empty').innerHTML = '请把本文件夹放到网站服务器，或在本地目录运行 <code>python3 -m http.server 8000</code> 后访问 <code>http://localhost:8000</code>。';
+      }
+    }
+
+    $('btnSearch').addEventListener('click', applyFilters);
+    $('btnReset').addEventListener('click', () => {
+      ['q','partTimer','subject','grade','status'].forEach(id => $(id).value = '');
+      applyFilters();
+    });
+    $('btnExport').addEventListener('click', downloadCSV);
+    ['q','partTimer','subject','grade','status'].forEach(id => {
+      $(id).addEventListener(id === 'q' ? 'input' : 'change', applyFilters);
+    });
+
+    init();
+  </script>
+</body>
+</html>
