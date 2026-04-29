@@ -2,9 +2,10 @@ name: Sync Feishu Data
 
 on:
   schedule:
-    # 北京时间 12:00 和 18:00（UTC 4:00 和 10:00）
-    - cron: '0 4 * * *'
-    - cron: '0 10 * * *'
+    # 北京时间 10:00、17:00、21:00（UTC 2:00、9:00、13:00）
+    - cron: '0 2 * * *'
+    - cron: '0 9 * * *'
+    - cron: '0 13 * * *'
   workflow_dispatch: # 支持手动触发
 
 jobs:
