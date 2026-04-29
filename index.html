@@ -688,7 +688,7 @@
       <div class="table-top">
         <div>
           <div class="table-title">任务明细</div>
-          <div class="hint">单价展示在题量后面；提成只读取“提成”字段，不再拿单价代替。</div>
+          <div class="hint">按任务ID、兼职、任务状态、质检审核完成日期快速筛选</div>
         </div>
       </div>
 
@@ -717,7 +717,7 @@
         <div class="empty" id="emptyState" hidden>
           <div class="empty-icon">🧐</div>
           <strong>没有找到匹配任务</strong>
-          <div>可以清空筛选，或检查“质检审核完成日期”字段是否有值。</div>
+          <div>可以清空筛选，或检查"质检审核完成日期"字段是否有值。</div>
         </div>
       </div>
     </section>
@@ -902,7 +902,7 @@
       );
 
       return {
-        taskId: pick(item, ["taskId", "任务ID", "任务id", "ID", "id"]),
+        taskId: pick(item, ["taskId", "任务ID", "任务id"]),
         taskName: pick(item, ["taskName", "任务名称", "任务名", "名称", "标题"]),
         partTimer: pick(item, ["partTimer", "兼职", "PPT兼职", "ppt兼职", "制作兼职", "接单人"], key => key.includes("兼职")),
         subject: pick(item, ["subject", "学科"]),
