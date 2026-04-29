@@ -37,24 +37,29 @@ FIELD_MAP = {
     "制作状态": "productionStatus",
     "分配状态": "allocationStatus",
     "兼职需交付日期": "dueDate",
+    "质检审核完成日期": "qcReviewCompletedDate",
     "视频要求交付": "videoDueDate",
     "创建时间": "createdAt",
     "任务分配时间": "assignedAt",
     "商家名称-主账号": "merchantMain",
     "商家名称-子账号": "merchantSub",
     "需求ID": "requirementId",
-    "单价": "price",
-    "抽检备注": "note",
+    "单价": "unitPrice",
+    "本月质检单价": "monthQcPrice",
+    "学年质检单价": "yearQcPrice",
+    "扣题": "deductedQuestions",
+    "抽检备注": "inspectionNote",
+    "提成": "commission",
 }
 
 # 需要从数组 [{text: "xxx"}] 中提取文本的字段
 ARRAY_TEXT_FIELDS = {"学段", "月份-创建日期", "月份-审核通过", "春通是否流入", "直接流转", "自定义ID"}
 
 # DateTime 类型字段（飞书返回毫秒时间戳 → "2026-04-21"）
-DATETIME_FIELDS = {"创建时间", "兼职需交付日期", "视频要求交付"}
+DATETIME_FIELDS = {"创建时间", "兼职需交付日期", "视频要求交付", "质检审核完成日期"}
 
 # Number 类型字段
-NUMBER_FIELDS = {"题量", "修改题量", "单价", "主任务ID", "子任务ID序号", "ID"}
+NUMBER_FIELDS = {"题量", "修改题量", "单价", "主任务ID", "子任务ID序号", "ID", "扣题"}
 
 # ModifiedTime 类型字段（返回毫秒时间戳）
 MODIFIED_TIME_FIELDS = {"任务分配时间"}

@@ -1,91 +1,1286 @@
 <!doctype html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>兼职任务查询看板</title>
-<style>
-:root{--bg1:#f6f7ff;--bg2:#eef9ff;--card:rgba(255,255,255,.86);--text:#172033;--muted:#6b7280;--line:rgba(30,41,59,.1);--brand:#6c5ce7;--green:#00b894;--blue:#0984e3;--orange:#f59e0b;--red:#ef4444;--shadow:0 20px 60px rgba(31,41,55,.12);--soft:0 10px 24px rgba(31,41,55,.08);--r:24px}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 12% 8%,rgba(108,92,231,.2),transparent 28%),radial-gradient(circle at 88% 10%,rgba(0,184,148,.18),transparent 30%),linear-gradient(135deg,var(--bg1),var(--bg2))}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:linear-gradient(rgba(255,255,255,.35) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.35) 1px,transparent 1px);background-size:34px 34px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.4),transparent 70%)}
-.app{width:min(1480px,calc(100% - 32px));margin:auto;padding:26px 0 60px}
-.hero{position:relative;overflow:hidden;border:1px solid rgba(255,255,255,.75);border-radius:30px;padding:28px;box-shadow:var(--shadow);background:linear-gradient(135deg,rgba(255,255,255,.9),rgba(255,255,255,.66)),linear-gradient(135deg,rgba(108,92,231,.16),rgba(0,184,148,.12));backdrop-filter:blur(18px)}
-.hero:after{content:"✓";position:absolute;right:28px;top:18px;width:86px;height:86px;border-radius:28px;display:grid;place-items:center;font-size:46px;color:rgba(108,92,231,.18);background:rgba(255,255,255,.55);transform:rotate(8deg)}
-.title-row{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;position:relative;z-index:1}.eyebrow{display:inline-flex;align-items:center;gap:8px;color:var(--brand);font-weight:900;font-size:13px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}.dot{width:9px;height:9px;border-radius:99px;background:var(--green);box-shadow:0 0 0 6px rgba(0,184,148,.12)}
-h1{margin:0;font-size:clamp(26px,3.4vw,46px);letter-spacing:-.04em;line-height:1.08}.sub{margin:12px 0 0;color:var(--muted);font-size:15px;line-height:1.7;max-width:760px}.actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:flex-end;min-width:240px}
-.btn{border:0;border-radius:999px;padding:11px 16px;font-size:14px;font-weight:900;cursor:pointer;transition:.18s;color:var(--text);background:rgba(255,255,255,.76);box-shadow:0 8px 18px rgba(31,41,55,.08);white-space:nowrap}.btn:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(31,41,55,.12)}.btn.success{color:#fff;background:linear-gradient(135deg,var(--green),#27d8aa)}.btn.ghost{color:var(--brand);background:rgba(108,92,231,.1);box-shadow:none}
-.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:20px;position:relative;z-index:1}.stat{padding:17px;border-radius:22px;background:rgba(255,255,255,.74);border:1px solid rgba(255,255,255,.88);box-shadow:var(--soft)}.stat-label{color:var(--muted);font-size:13px;font-weight:800}.stat-num{margin-top:8px;font-size:28px;font-weight:950;letter-spacing:-.03em}
-.filters-wrap{position:sticky;top:10px;z-index:20;margin-top:18px}.filters{border-radius:28px;background:rgba(255,255,255,.86);border:1px solid rgba(255,255,255,.9);box-shadow:var(--shadow);backdrop-filter:blur(18px);padding:16px}.filter-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr 1fr;gap:12px;align-items:end}.field{display:flex;flex-direction:column;gap:7px;min-width:0}label{font-size:12px;color:var(--muted);font-weight:900;padding-left:4px}input,select{width:100%;border:1px solid rgba(30,41,59,.12);border-radius:16px;padding:12px 13px;outline:none;background:rgba(255,255,255,.94);color:var(--text);font-size:14px;transition:.18s}input:focus,select:focus{border-color:rgba(108,92,231,.56);box-shadow:0 0 0 5px rgba(108,92,231,.12)}
-.date-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.quick-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;align-items:center;justify-content:space-between}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border:0;background:rgba(108,92,231,.09);color:#5144bb;border-radius:999px;padding:8px 11px;font-weight:900;cursor:pointer;transition:.18s}.chip:hover,.chip.active{color:#fff;background:var(--brand);transform:translateY(-1px)}.result-text{color:var(--muted);font-size:13px;font-weight:900}
-.table-card{margin-top:18px;border-radius:28px;background:rgba(255,255,255,.82);border:1px solid rgba(255,255,255,.9);box-shadow:var(--shadow);overflow:hidden;backdrop-filter:blur(18px)}.table-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 18px;border-bottom:1px solid var(--line)}.table-title{font-weight:950;font-size:17px}.hint{color:var(--muted);font-size:13px}.table-scroll{overflow:auto;max-height:calc(100vh - 250px)}table{width:100%;border-collapse:separate;border-spacing:0;min-width:1180px;font-size:14px}thead th{position:sticky;top:0;z-index:5;background:rgba(248,250,252,.98);color:#4b5563;text-align:left;padding:13px 12px;border-bottom:1px solid var(--line);font-size:12px;letter-spacing:.03em;white-space:nowrap}tbody td{padding:14px 12px;border-bottom:1px solid rgba(30,41,59,.07);vertical-align:top}tbody tr{transition:.18s}tbody tr:hover{background:rgba(108,92,231,.06)}.task-id{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-weight:950;color:var(--brand)}.task-name{max-width:300px;font-weight:850;line-height:1.45}
-.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:6px 10px;font-weight:950;font-size:12px;white-space:nowrap}.pill:before{content:"";width:7px;height:7px;border-radius:99px;background:currentColor}.ok{color:#047857;background:rgba(16,185,129,.12)}.doing{color:#0369a1;background:rgba(14,165,233,.13)}.wait{color:#92400e;background:rgba(245,158,11,.15)}.bad{color:#b91c1c;background:rgba(239,68,68,.13)}.neutral{color:#475569;background:rgba(100,116,139,.12)}.money{font-weight:950;color:#047857}.note{max-width:280px;color:#4b5563;line-height:1.45}.empty{padding:50px 20px;text-align:center;color:var(--muted)}.empty-icon{font-size:42px;margin-bottom:10px}
-.backtop{position:fixed;right:22px;bottom:24px;z-index:40;width:52px;height:52px;border:0;border-radius:18px;color:#fff;background:linear-gradient(135deg,var(--brand),#8e7dff);box-shadow:0 16px 38px rgba(108,92,231,.38);cursor:pointer;font-size:22px;opacity:0;transform:translateY(14px);pointer-events:none;transition:.2s}.backtop.show{opacity:1;transform:translateY(0);pointer-events:auto}.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:60;background:rgba(17,24,39,.92);color:#fff;border-radius:999px;padding:11px 16px;font-weight:900;box-shadow:var(--shadow);transition:.22s}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-@media(max-width:1100px){.filter-grid{grid-template-columns:1fr 1fr}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.hero:after{display:none}}@media(max-width:720px){.app{width:min(100% - 18px,1480px);padding-top:10px}.hero{padding:20px;border-radius:24px}.title-row{display:block}.actions{justify-content:flex-start;margin-top:16px}.stats{grid-template-columns:1fr}.filters-wrap{top:6px}.filters{padding:12px;border-radius:22px}.filter-grid,.date-row{grid-template-columns:1fr}.table-scroll{max-height:none}.table-top{align-items:flex-start;flex-direction:column}.backtop{right:14px;bottom:16px}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>兼职任务查询看板</title>
+  <style>
+    :root {
+      --bg1: #f7f5ff;
+      --bg2: #effbff;
+      --card: rgba(255, 255, 255, 0.84);
+      --white: #fff;
+      --text: #111827;
+      --muted: #667085;
+      --line: rgba(15, 23, 42, 0.10);
+      --brand: #7057ff;
+      --brand2: #00c2a8;
+      --blue: #1683ff;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --green: #10b981;
+      --purpleSoft: rgba(112, 87, 255, .12);
+      --shadow: 0 24px 70px rgba(31, 41, 55, 0.13);
+      --soft: 0 12px 28px rgba(31, 41, 55, 0.08);
+      --radius: 28px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+        "Hiragino Sans GB", "Microsoft YaHei", Arial, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 14% 8%, rgba(112, 87, 255, .20), transparent 26%),
+        radial-gradient(circle at 88% 6%, rgba(0, 194, 168, .18), transparent 24%),
+        radial-gradient(circle at 68% 92%, rgba(22, 131, 255, .12), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.38) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.38) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.42), transparent 72%);
+    }
+
+    .app {
+      position: relative;
+      width: min(1520px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 26px 0 60px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      border-radius: 34px;
+      padding: 30px;
+      border: 1px solid rgba(255,255,255,.82);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.90), rgba(255,255,255,.66)),
+        linear-gradient(135deg, rgba(112,87,255,.14), rgba(0,194,168,.12));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .hero::after {
+      content: "¥";
+      position: absolute;
+      right: 24px;
+      top: 18px;
+      width: 94px;
+      height: 94px;
+      display: grid;
+      place-items: center;
+      border-radius: 32px;
+      color: rgba(112, 87, 255, .16);
+      background: rgba(255,255,255,.55);
+      font-size: 54px;
+      font-weight: 950;
+      transform: rotate(9deg);
+    }
+
+    .top-row {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 22px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 10px;
+      color: var(--brand);
+      font-size: 13px;
+      font-weight: 950;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--brand2);
+      box-shadow: 0 0 0 7px rgba(0,194,168,.13);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 3.4vw, 50px);
+      line-height: 1.05;
+      letter-spacing: -0.055em;
+    }
+
+    .sub {
+      max-width: 860px;
+      margin: 13px 0 0;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.7;
+      font-weight: 650;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 10px;
+      min-width: 250px;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 16px;
+      color: var(--text);
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 9px 20px rgba(31,41,55,.08);
+      font-size: 14px;
+      font-weight: 950;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(31,41,55,.14);
+    }
+
+    .btn.primary {
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), #8d7aff);
+    }
+
+    .btn.success {
+      color: #fff;
+      background: linear-gradient(135deg, #02b894, #0dd2b3);
+    }
+
+    .btn.ghost {
+      color: var(--brand);
+      background: rgba(112,87,255,.11);
+      box-shadow: none;
+    }
+
+    .stats {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .stat {
+      position: relative;
+      overflow: hidden;
+      padding: 17px;
+      min-height: 108px;
+      border-radius: 24px;
+      background: rgba(255,255,255,.76);
+      border: 1px solid rgba(255,255,255,.90);
+      box-shadow: var(--soft);
+    }
+
+    .stat::after {
+      content: "";
+      position: absolute;
+      right: -20px;
+      bottom: -26px;
+      width: 74px;
+      height: 74px;
+      border-radius: 999px;
+      background: var(--purpleSoft);
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    .stat-num {
+      margin-top: 9px;
+      font-size: 28px;
+      font-weight: 950;
+      letter-spacing: -0.04em;
+      word-break: break-all;
+    }
+
+    .stat-small {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .filters-wrap {
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      margin-top: 18px;
+    }
+
+    .filters {
+      padding: 16px;
+      border-radius: var(--radius);
+      background: rgba(255,255,255,.88);
+      border: 1px solid rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .filter-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr 1fr 1fr 1.3fr;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    label {
+      padding-left: 4px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 950;
+    }
+
+    input, select {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid rgba(15,23,42,.12);
+      border-radius: 17px;
+      padding: 12px 13px;
+      outline: none;
+      color: var(--text);
+      background: rgba(255,255,255,.94);
+      font-size: 14px;
+      font-weight: 650;
+      transition: border .18s ease, box-shadow .18s ease;
+    }
+
+    input:focus, select:focus {
+      border-color: rgba(112,87,255,.58);
+      box-shadow: 0 0 0 5px rgba(112,87,255,.12);
+    }
+
+    .date-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .quick-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .chip {
+      border: 0;
+      border-radius: 999px;
+      padding: 8px 12px;
+      color: #5144bb;
+      background: rgba(112,87,255,.10);
+      font-weight: 950;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, color .18s ease;
+    }
+
+    .chip:hover, .chip.active {
+      color: #fff;
+      background: var(--brand);
+      transform: translateY(-1px);
+    }
+
+    .result-text {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 950;
+    }
+
+    .active-line {
+      min-height: 24px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 850;
+    }
+
+    .active-tag {
+      display: inline-flex;
+      margin: 3px 5px 0 0;
+      padding: 5px 9px;
+      border-radius: 999px;
+      color: #4f46e5;
+      background: rgba(112,87,255,.10);
+      font-weight: 950;
+    }
+
+    .table-card {
+      margin-top: 18px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: rgba(255,255,255,.84);
+      border: 1px solid rgba(255,255,255,.92);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .table-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .table-title {
+      font-size: 17px;
+      font-weight: 950;
+    }
+
+    .hint {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .table-scroll {
+      overflow: auto;
+      max-height: calc(100vh - 250px);
+    }
+
+    table {
+      width: 100%;
+      min-width: 1280px;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-size: 14px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      padding: 13px 12px;
+      color: #475467;
+      background: rgba(248,250,252,.98);
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    tbody td {
+      padding: 14px 12px;
+      border-bottom: 1px solid rgba(15,23,42,.07);
+      vertical-align: top;
+    }
+
+    tbody tr {
+      transition: background .18s ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(112,87,255,.06);
+    }
+
+    .task-id {
+      color: var(--brand);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .task-name {
+      max-width: 320px;
+      line-height: 1.45;
+      font-weight: 850;
+    }
+
+    .num {
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .money {
+      color: #047857;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .note {
+      max-width: 300px;
+      color: #475467;
+      line-height: 1.45;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 950;
+      white-space: nowrap;
+    }
+
+    .pill::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: currentColor;
+    }
+
+    .ok { color: #047857; background: rgba(16,185,129,.13); }
+    .doing { color: #0369a1; background: rgba(14,165,233,.14); }
+    .wait { color: #92400e; background: rgba(245,158,11,.16); }
+    .bad { color: #b91c1c; background: rgba(239,68,68,.14); }
+    .neutral { color: #475569; background: rgba(100,116,139,.13); }
+
+    .empty {
+      padding: 54px 20px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .empty-icon {
+      margin-bottom: 10px;
+      font-size: 42px;
+    }
+
+    .backtop {
+      position: fixed;
+      right: 22px;
+      bottom: 24px;
+      z-index: 50;
+      width: 54px;
+      height: 54px;
+      border: 0;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, var(--brand), #8d7aff);
+      box-shadow: 0 16px 38px rgba(112,87,255,.38);
+      font-size: 23px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+      transition: all .2s ease;
+    }
+
+    .backtop.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 28px;
+      z-index: 60;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      padding: 11px 16px;
+      border-radius: 999px;
+      color: #fff;
+      background: rgba(17,24,39,.93);
+      box-shadow: var(--shadow);
+      font-weight: 950;
+      transition: all .22s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    @media (max-width: 1260px) {
+      .stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .filter-grid { grid-template-columns: 1fr 1fr; }
+      .hero::after { display: none; }
+    }
+
+    @media (max-width: 720px) {
+      .app {
+        width: min(100% - 18px, 1520px);
+        padding-top: 10px;
+      }
+
+      .hero {
+        padding: 20px;
+        border-radius: 26px;
+      }
+
+      .top-row { display: block; }
+
+      .actions {
+        justify-content: flex-start;
+        margin-top: 16px;
+      }
+
+      .stats { grid-template-columns: 1fr 1fr; }
+
+      .filters-wrap { top: 6px; }
+
+      .filters {
+        padding: 12px;
+        border-radius: 23px;
+      }
+
+      .filter-grid, .date-row { grid-template-columns: 1fr; }
+
+      .table-top {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .table-scroll { max-height: none; }
+
+      .backtop {
+        right: 14px;
+        bottom: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-<main class="app">
-<section class="hero" id="top">
-<div class="title-row">
-<div><div class="eyebrow"><span class="dot"></span>Task Board</div><h1>兼职任务查询看板</h1><p class="sub">按兼职、任务ID、任务状态和质检审核完成日期快速筛选任务，提成结算以“质检审核完成日期”为准。</p></div>
-<div class="actions"><button class="btn ghost" id="copySummaryBtn" type="button">复制筛选摘要</button><button class="btn success" id="exportBtn" type="button">导出当前结果</button></div>
-</div>
-<div class="stats"><div class="stat"><div class="stat-label">📦 总任务数</div><div class="stat-num" id="totalCount">0</div></div><div class="stat"><div class="stat-label">✅ 已完成</div><div class="stat-num" id="doneCount">0</div></div><div class="stat"><div class="stat-label">⏳ 待处理</div><div class="stat-num" id="pendingCount">0</div></div><div class="stat"><div class="stat-label">🔎 当前筛选</div><div class="stat-num" id="filteredCount">0</div></div></div>
-</section>
+  <main class="app">
+    <section class="hero" id="top">
+      <div class="top-row">
+        <div>
+          <div class="eyebrow"><span class="dot"></span>Task Board</div>
+          <h1>兼职任务查询看板</h1>
+          <p class="sub">按兼职、任务ID、任务状态和质检审核完成日期筛选任务；题量、扣题和提成会跟随筛选结果自动汇总。</p>
+        </div>
+        <div class="actions">
+          <button class="btn ghost" id="copySummaryBtn" type="button">复制筛选摘要</button>
+          <button class="btn success" id="exportBtn" type="button">导出当前结果</button>
+        </div>
+      </div>
 
-<section class="filters-wrap"><div class="filters">
-<div class="filter-grid">
-<div class="field"><label for="keywordInput">关键词</label><input id="keywordInput" type="search" placeholder="搜索任务名、备注、学科、年级..."></div>
-<div class="field"><label for="taskIdInput">任务ID</label><input id="taskIdInput" type="search" placeholder="输入任务ID"></div>
-<div class="field"><label for="partTimerSelect">兼职</label><select id="partTimerSelect"><option value="">全部兼职</option></select></div>
-<div class="field"><label for="statusSelect">任务状态</label><select id="statusSelect"><option value="">全部状态</option></select></div>
-<div class="field"><label>质检审核完成日期</label><div class="date-row"><input id="startDateInput" type="date"><input id="endDateInput" type="date"></div></div>
-</div>
-<div class="quick-row">
-<div class="chips" id="quickChips"><button class="chip active" data-range="all" type="button">全部</button><button class="chip" data-range="today" type="button">今天</button><button class="chip" data-range="7days" type="button">最近7天</button><button class="chip" data-range="month" type="button">本月</button><button class="chip" data-range="lastMonth" type="button">上月</button></div>
-<div class="chips"><button class="btn" id="resetBtn" type="button">清空筛选</button><span class="result-text" id="resultText">正在读取数据...</span></div>
-</div>
-</div></section>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">📦 总任务数</div>
+          <div class="stat-num" id="totalCount">0</div>
+          <div class="stat-small">全部数据</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">🔎 当前任务</div>
+          <div class="stat-num" id="filteredCount">0</div>
+          <div class="stat-small">筛选后</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">🧮 题量合计</div>
+          <div class="stat-num" id="quantitySum">0</div>
+          <div class="stat-small">当前筛选</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">✂️ 扣题合计</div>
+          <div class="stat-num" id="deductedSum">0</div>
+          <div class="stat-small">当前筛选</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">💰 提成合计</div>
+          <div class="stat-num" id="commissionSum">0</div>
+          <div class="stat-small">当前筛选</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">✅ 已完成</div>
+          <div class="stat-num" id="doneCount">0</div>
+          <div class="stat-small">当前筛选</div>
+        </div>
+      </div>
+    </section>
 
-<section class="table-card">
-<div class="table-top"><div><div class="table-title">任务明细</div><div class="hint">横向滚动可查看更多字段；表头固定方便对照。</div></div></div>
-<div class="table-scroll">
-<table><thead><tr><th>任务ID</th><th>任务名称</th><th>兼职</th><th>学科</th><th>年级</th><th>题量</th><th>任务状态</th><th>交付日期</th><th>质检审核完成日期</th><th>扣题</th><th>抽检备注</th><th>提成</th></tr></thead><tbody id="tbody"></tbody></table>
-<div class="empty" id="emptyState" hidden><div class="empty-icon">🧐</div><strong>没有找到匹配任务</strong><div>换个关键词，或清空筛选试试。</div></div>
-</div></section>
-</main>
-<button class="backtop" id="backTopBtn" type="button">↑</button><div class="toast" id="toast">已复制</div>
+    <section class="filters-wrap" aria-label="筛选区">
+      <div class="filters">
+        <div class="filter-grid">
+          <div class="field">
+            <label for="keywordInput">关键词</label>
+            <input id="keywordInput" type="search" placeholder="搜索任务名、备注、学科、年级..." />
+          </div>
+          <div class="field">
+            <label for="taskIdInput">任务ID</label>
+            <input id="taskIdInput" type="search" placeholder="输入任务ID" />
+          </div>
+          <div class="field">
+            <label for="partTimerSelect">兼职</label>
+            <select id="partTimerSelect">
+              <option value="">全部兼职</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="statusSelect">任务状态</label>
+            <select id="statusSelect">
+              <option value="">全部状态</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>质检审核完成日期</label>
+            <div class="date-row">
+              <input id="startDateInput" type="date" />
+              <input id="endDateInput" type="date" />
+            </div>
+          </div>
+        </div>
 
-<script>
-const $=id=>document.getElementById(id);
-const fields=[["taskId","任务ID"],["taskName","任务名称"],["partTimer","兼职"],["subject","学科"],["grade","年级"],["quantity","题量"],["productionStatus","任务状态"],["dueDate","交付日期"],["qcReviewCompletedDate","质检审核完成日期"],["deductedQuestions","扣题"],["inspectionNote","抽检备注"],["commission","提成"]];
-let rawData=[],current=[];
-function valueOf(obj,keys){for(const k of keys){const v=obj?.[k];if(v!==undefined&&v!==null&&String(v).trim()!=="")return String(v).trim()}return""}
-function parseDate(input){if(!input)return null;const t=String(input).trim();if(!t)return null;const n=t.replace(/\./g,"-").replace(/\//g,"-").replace(/[年月]/g,"-").replace(/日/g,"").split(" ")[0];const m=n.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);if(!m)return null;const y=+m[1],mo=+m[2],d=+m[3],date=new Date(y,mo-1,d);if(date.getFullYear()!==y||date.getMonth()!==mo-1||date.getDate()!==d)return null;return date}
-function dateVal(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`}
-function fmtDate(v){const d=parseDate(v);return d?dateVal(d):(v||"")}
-function normalizeItem(item){return{taskId:valueOf(item,["taskId","任务ID","任务id","ID","id"]),taskName:valueOf(item,["taskName","任务名称","任务名","名称"]),partTimer:valueOf(item,["partTimer","兼职","PPT兼职","ppt兼职","制作兼职","接单人"]),subject:valueOf(item,["subject","学科"]),grade:valueOf(item,["grade","年级"]),quantity:valueOf(item,["quantity","题量","数量"]),productionStatus:valueOf(item,["productionStatus","taskStatus","任务状态","制作状态","状态","分配状态"]),dueDate:fmtDate(valueOf(item,["dueDate","交付日期","预计交付日期"])),qcReviewCompletedDate:fmtDate(valueOf(item,["qcReviewCompletedDate","质检审核完成日期","qcCompletedDate","质检交付完成日期","质检完成日期","审核完成日期","质检日期"])),deductedQuestions:valueOf(item,["deductedQuestions","扣题","扣题数","扣除题数"]),inspectionNote:valueOf(item,["inspectionNote","抽检备注","质检备注","备注","note"]),commission:valueOf(item,["commission","提成","结算提成","金额","price","价格"])}}
-function isDone(s){return /完成|已交付|通过|结算|审核完成/.test(s||"")}function isBad(s){return /异常|退回|驳回|失败|暂停|取消/.test(s||"")}function isDoing(s){return /进行|制作中|处理中|待质检|审核中|分配成功/.test(s||"")}function statusClass(s){if(!s)return"neutral";if(isBad(s))return"bad";if(isDone(s))return"ok";if(isDoing(s))return"doing";if(/待|未|排队/.test(s))return"wait";return"neutral"}
-function td(text,cls=""){const c=document.createElement("td");if(cls)c.className=cls;c.textContent=text||"-";return c}
-function statusTd(s){const c=document.createElement("td"),span=document.createElement("span");span.className=`pill ${statusClass(s)}`;span.textContent=s||"未填写";c.appendChild(span);return c}
-function renderTable(data){const body=$("tbody");body.innerHTML="";$("emptyState").hidden=data.length!==0;const frag=document.createDocumentFragment();data.forEach(x=>{const tr=document.createElement("tr");tr.append(td(x.taskId,"task-id"),td(x.taskName,"task-name"),td(x.partTimer),td(x.subject),td(x.grade),td(x.quantity),statusTd(x.productionStatus),td(x.dueDate),td(x.qcReviewCompletedDate),td(x.deductedQuestions),td(x.inspectionNote,"note"),td(x.commission,"money"));frag.appendChild(tr)});body.appendChild(frag)}
-function unique(key){return[...new Set(rawData.map(x=>x[key]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),"zh-CN"))}
-function fillSelect(id,values,label){const s=$(id);s.innerHTML=`<option value="">${label}</option>`;values.forEach(v=>{const o=document.createElement("option");o.value=v;o.textContent=v;s.appendChild(o)})}
-function initFilters(){fillSelect("partTimerSelect",unique("partTimer"),"全部兼职");fillSelect("statusSelect",unique("productionStatus"),"全部状态")}
-function matchKeyword(x,k){if(!k)return true;return[x.taskId,x.taskName,x.partTimer,x.subject,x.grade,x.quantity,x.productionStatus,x.qcReviewCompletedDate,x.inspectionNote,x.commission].join(" ").toLowerCase().includes(k.toLowerCase())}
-function inDateRange(x){const sv=$("startDateInput").value,ev=$("endDateInput").value;if(!sv&&!ev)return true;const d=parseDate(x.qcReviewCompletedDate);if(!d)return false;const s=sv?parseDate(sv):null,e=ev?parseDate(ev):null;if(s&&d<s)return false;if(e&&d>e)return false;return true}
-function applyFilters(){const k=$("keywordInput").value.trim(),tid=$("taskIdInput").value.trim().toLowerCase(),pt=$("partTimerSelect").value,st=$("statusSelect").value;current=rawData.filter(x=>matchKeyword(x,k)&&(!tid||String(x.taskId).toLowerCase().includes(tid))&&(!pt||x.partTimer===pt)&&(!st||x.productionStatus===st)&&inDateRange(x));renderStats();renderTable(current);$("resultText").textContent=`共 ${rawData.length} 条任务，当前筛选 ${current.length} 条`}
-function renderStats(){$("totalCount").textContent=rawData.length;$("doneCount").textContent=rawData.filter(x=>isDone(x.productionStatus)).length;$("pendingCount").textContent=rawData.filter(x=>!isDone(x.productionStatus)).length;$("filteredCount").textContent=current.length}
-function resetFilters(){$("keywordInput").value="";$("taskIdInput").value="";$("partTimerSelect").value="";$("statusSelect").value="";$("startDateInput").value="";$("endDateInput").value="";setActiveChip("all");applyFilters();toast("筛选已清空")}
-function setActiveChip(r){document.querySelectorAll(".chip[data-range]").forEach(b=>b.classList.toggle("active",b.dataset.range===r))}
-function setQuickRange(r){const today=new Date(),start=new Date(today),end=new Date(today);if(r==="all"){$("startDateInput").value="";$("endDateInput").value=""}if(r==="today"){$("startDateInput").value=dateVal(today);$("endDateInput").value=dateVal(today)}if(r==="7days"){start.setDate(today.getDate()-6);$("startDateInput").value=dateVal(start);$("endDateInput").value=dateVal(end)}if(r==="month"){const first=new Date(today.getFullYear(),today.getMonth(),1);$("startDateInput").value=dateVal(first);$("endDateInput").value=dateVal(end)}if(r==="lastMonth"){const first=new Date(today.getFullYear(),today.getMonth()-1,1),last=new Date(today.getFullYear(),today.getMonth(),0);$("startDateInput").value=dateVal(first);$("endDateInput").value=dateVal(last)}setActiveChip(r);applyFilters()}
-function escapeCSV(v){return `"${String(v??"").replaceAll('"','""')}"`}
-function downloadCSV(){const headers=fields.map(f=>f[1]),rows=current.map(x=>fields.map(f=>x[f[0]]||""));const csv=[headers,...rows].map(r=>r.map(escapeCSV).join(",")).join("\n");const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8;"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`兼职任务查询结果_${dateVal(new Date())}.csv`;a.click();URL.revokeObjectURL(url);toast(`已导出 ${current.length} 条`)}
-async function copySummary(){const text=["兼职任务查询摘要",`总任务数：${rawData.length}`,`当前筛选：${current.length}`,`兼职：${$("partTimerSelect").value||"全部"}`,`任务状态：${$("statusSelect").value||"全部"}`,`任务ID：${$("taskIdInput").value||"未指定"}`,`关键词：${$("keywordInput").value||"未指定"}`,`质检审核完成日期：${$("startDateInput").value||"不限"} 至 ${$("endDateInput").value||"不限"}`].join("\n");try{await navigator.clipboard.writeText(text);toast("筛选摘要已复制")}catch(e){toast("复制失败，可导出 CSV")}}
-function toast(msg){const el=$("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);window.__toastTimer=setTimeout(()=>el.classList.remove("show"),1800)}
-async function loadData(){try{const res=await fetch("data.json",{cache:"no-store"});if(!res.ok)throw new Error("data.json 读取失败");const json=await res.json();const list=Array.isArray(json)?json:(json.data||json.rows||[]);rawData=list.map(normalizeItem);current=[...rawData];initFilters();applyFilters();toast("数据已更新")}catch(e){console.error(e);rawData=[];current=[];renderStats();renderTable([]);$("resultText").textContent="未读取到 data.json，请检查文件是否在同一目录";$("emptyState").hidden=false}}
-function bindEvents(){["keywordInput","taskIdInput","partTimerSelect","statusSelect","startDateInput","endDateInput"].forEach(id=>$(id).addEventListener("input",applyFilters));$("resetBtn").addEventListener("click",resetFilters);$("exportBtn").addEventListener("click",downloadCSV);$("copySummaryBtn").addEventListener("click",copySummary);document.querySelectorAll(".chip[data-range]").forEach(btn=>btn.addEventListener("click",()=>setQuickRange(btn.dataset.range)));$("backTopBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));window.addEventListener("scroll",()=>$("backTopBtn").classList.toggle("show",window.scrollY>420))}
-bindEvents();loadData();
-</script>
+        <div class="quick-row">
+          <div class="chips">
+            <button class="chip active" data-range="all" type="button">全部</button>
+            <button class="chip" data-range="today" type="button">今天</button>
+            <button class="chip" data-range="7days" type="button">最近7天</button>
+            <button class="chip" data-range="month" type="button">本月</button>
+            <button class="chip" data-range="lastMonth" type="button">上月</button>
+          </div>
+          <div class="chips">
+            <button class="btn" id="resetBtn" type="button">清空筛选</button>
+            <span class="result-text" id="resultText">正在读取数据...</span>
+          </div>
+        </div>
+
+        <div class="active-line" id="activeLine"></div>
+      </div>
+    </section>
+
+    <section class="table-card">
+      <div class="table-top">
+        <div>
+          <div class="table-title">任务明细</div>
+          <div class="hint">单价展示在题量后面；提成只读取“提成”字段，不再拿单价代替。</div>
+        </div>
+      </div>
+
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>任务ID</th>
+              <th>任务名称</th>
+              <th>兼职</th>
+              <th>学科</th>
+              <th>年级</th>
+              <th>题量</th>
+              <th>单价</th>
+              <th>任务状态</th>
+              <th>交付日期</th>
+              <th>质检审核完成日期</th>
+              <th>扣题</th>
+              <th>抽检备注</th>
+              <th>提成</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+
+        <div class="empty" id="emptyState" hidden>
+          <div class="empty-icon">🧐</div>
+          <strong>没有找到匹配任务</strong>
+          <div>可以清空筛选，或检查“质检审核完成日期”字段是否有值。</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <button class="backtop" id="backTopBtn" type="button" title="返回顶部">↑</button>
+  <div class="toast" id="toast">已完成</div>
+
+  <script>
+    const $ = id => document.getElementById(id);
+
+    const exportFields = [
+      ["taskId", "任务ID"],
+      ["taskName", "任务名称"],
+      ["partTimer", "兼职"],
+      ["subject", "学科"],
+      ["grade", "年级"],
+      ["quantity", "题量"],
+      ["unitPrice", "单价"],
+      ["productionStatus", "任务状态"],
+      ["dueDate", "交付日期"],
+      ["qcReviewCompletedDate", "质检审核完成日期"],
+      ["deductedQuestions", "扣题"],
+      ["inspectionNote", "抽检备注"],
+      ["commission", "提成"]
+    ];
+
+    let rawData = [];
+    let current = [];
+
+    function cleanKey(key) {
+      return String(key || "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/[()（）【】\[\]_:：\-]/g, "");
+    }
+
+    function cellToText(value) {
+      if (value === undefined || value === null) return "";
+      if (typeof value === "number") return String(value);
+      if (typeof value === "boolean") return value ? "是" : "否";
+      if (typeof value === "string") return value.trim();
+
+      if (Array.isArray(value)) {
+        return value.map(cellToText).filter(Boolean).join("、");
+      }
+
+      if (typeof value === "object") {
+        if ("text" in value) return cellToText(value.text);
+        if ("name" in value) return cellToText(value.name);
+        if ("title" in value) return cellToText(value.title);
+        if ("displayValue" in value) return cellToText(value.displayValue);
+        if ("value" in value) return cellToText(value.value);
+
+        const values = Object.values(value)
+          .map(cellToText)
+          .filter(Boolean)
+          .filter(v => v !== "[object Object]");
+
+        return values.slice(0, 3).join("、");
+      }
+
+      return String(value || "").trim();
+    }
+
+    function pick(obj, aliases, matcher) {
+      const keys = Object.keys(obj || {});
+      const aliasSet = new Set(aliases.map(cleanKey));
+
+      for (const key of keys) {
+        if (aliasSet.has(cleanKey(key))) return cellToText(obj[key]);
+      }
+
+      if (matcher) {
+        for (const key of keys) {
+          if (matcher(cleanKey(key), key)) return cellToText(obj[key]);
+        }
+      }
+
+      return "";
+    }
+
+    function parseDate(input) {
+      if (input === undefined || input === null || input === "") return null;
+
+      if (typeof input === "number") {
+        return parseNumberDate(input);
+      }
+
+      const raw = String(input).trim();
+      if (!raw) return null;
+
+      if (/^\d+(\.\d+)?$/.test(raw)) {
+        return parseNumberDate(Number(raw));
+      }
+
+      const normalized = raw
+        .replace(/\./g, "-")
+        .replace(/\//g, "-")
+        .replace(/[年月]/g, "-")
+        .replace(/日/g, "")
+        .replace(/T/g, " ")
+        .trim();
+
+      const ymd = normalized.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (ymd) {
+        const y = Number(ymd[1]);
+        const m = Number(ymd[2]);
+        const d = Number(ymd[3]);
+        const date = new Date(y, m - 1, d);
+        if (date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d) {
+          return date;
+        }
+      }
+
+      const parsed = new Date(raw);
+      if (!Number.isNaN(parsed.getTime())) {
+        return new Date(parsed.getFullYear(), parsed.getMonth(), parsed.getDate());
+      }
+
+      return null;
+    }
+
+    function parseNumberDate(num) {
+      if (!Number.isFinite(num)) return null;
+
+      let date = null;
+
+      if (num > 1000000000000) {
+        date = new Date(num);
+      } else if (num > 1000000000) {
+        date = new Date(num * 1000);
+      } else if (num > 20000 && num < 80000) {
+        date = new Date((num - 25569) * 86400 * 1000);
+      }
+
+      if (!date || Number.isNaN(date.getTime())) return null;
+      return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    }
+
+    function dateValue(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    }
+
+    function formatDateText(value) {
+      const date = parseDate(value);
+      return date ? dateValue(date) : cellToText(value);
+    }
+
+    function toNumber(value) {
+      if (value === undefined || value === null || value === "") return 0;
+      const text = String(value)
+        .replace(/,/g, "")
+        .replace(/[￥¥元]/g, "")
+        .trim();
+
+      const match = text.match(/-?\d+(\.\d+)?/);
+      return match ? Number(match[0]) : 0;
+    }
+
+    function formatNumber(value, maxDecimal = 2) {
+      const num = Number(value || 0);
+      return Number.isInteger(num)
+        ? String(num)
+        : num.toLocaleString("zh-CN", { maximumFractionDigits: maxDecimal });
+    }
+
+    function formatMoney(value) {
+      const num = Number(value || 0);
+      return num.toLocaleString("zh-CN", { maximumFractionDigits: 2 });
+    }
+
+    function normalizeItem(item) {
+      const qcRaw = pick(
+        item,
+        ["qcReviewCompletedDate", "质检审核完成日期", "质检审核完成时间", "qcCompletedDate", "质检交付完成日期", "质检完成日期", "审核完成日期", "审核通过日期"],
+        key => key.includes("质检") && key.includes("审核") && key.includes("完成")
+      );
+
+      return {
+        taskId: pick(item, ["taskId", "任务ID", "任务id", "ID", "id"]),
+        taskName: pick(item, ["taskName", "任务名称", "任务名", "名称", "标题"]),
+        partTimer: pick(item, ["partTimer", "兼职", "PPT兼职", "ppt兼职", "制作兼职", "接单人"], key => key.includes("兼职")),
+        subject: pick(item, ["subject", "学科"]),
+        grade: pick(item, ["grade", "年级"]),
+        quantity: pick(item, ["quantity", "题量", "数量"], key => key.includes("题量") && !key.includes("换算")),
+        unitPrice: pick(item, ["unitPrice", "单价", "本月质检单价", "本月创建单价", "学年质检单价", "学年创建单价", "price", "价格"], key => key.includes("单价")),
+        productionStatus: pick(item, ["productionStatus", "taskStatus", "任务状态", "制作状态", "状态"], key => key.includes("状态") && !key.includes("分配")),
+        dueDate: formatDateText(pick(item, ["dueDate", "交付日期", "预计交付日期", "兼职需交付日期"], key => key.includes("交付") && key.includes("日期") && !key.includes("质检") && !key.includes("审核"))),
+        qcReviewCompletedDate: formatDateText(qcRaw),
+        deductedQuestions: pick(item, ["deductedQuestions", "扣题", "扣题数", "扣除题数"], key => key.includes("扣题")),
+        inspectionNote: pick(item, ["inspectionNote", "抽检备注", "质检备注", "备注", "note"], key => key.includes("抽检") && key.includes("备注")),
+        commission: pick(item, ["commission", "提成", "结算提成", "实际提成", "应发提成"], key => key.includes("提成"))
+      };
+    }
+
+    function isDone(status) {
+      return /完成|已交付|通过|结算|审核完成|已审核/.test(status || "");
+    }
+
+    function isBad(status) {
+      return /异常|退回|驳回|失败|暂停|取消|返修/.test(status || "");
+    }
+
+    function isDoing(status) {
+      return /进行|制作中|处理中|待质检|审核中|分配成功|排版中/.test(status || "");
+    }
+
+    function statusClass(status) {
+      if (!status) return "neutral";
+      if (isBad(status)) return "bad";
+      if (isDone(status)) return "ok";
+      if (isDoing(status)) return "doing";
+      if (/待|未|排队/.test(status)) return "wait";
+      return "neutral";
+    }
+
+    function td(text, className = "") {
+      const cell = document.createElement("td");
+      if (className) cell.className = className;
+      cell.textContent = text || "-";
+      return cell;
+    }
+
+    function statusTd(status) {
+      const cell = document.createElement("td");
+      const span = document.createElement("span");
+      span.className = `pill ${statusClass(status)}`;
+      span.textContent = status || "未填写";
+      cell.appendChild(span);
+      return cell;
+    }
+
+    function renderTable(data) {
+      const tbody = $("tbody");
+      tbody.innerHTML = "";
+      $("emptyState").hidden = data.length !== 0;
+
+      const frag = document.createDocumentFragment();
+
+      data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.append(
+          td(item.taskId, "task-id"),
+          td(item.taskName, "task-name"),
+          td(item.partTimer),
+          td(item.subject),
+          td(item.grade),
+          td(item.quantity, "num"),
+          td(item.unitPrice, "money"),
+          statusTd(item.productionStatus),
+          td(item.dueDate),
+          td(item.qcReviewCompletedDate),
+          td(item.deductedQuestions, "num"),
+          td(item.inspectionNote, "note"),
+          td(item.commission, "money")
+        );
+        frag.appendChild(tr);
+      });
+
+      tbody.appendChild(frag);
+    }
+
+    function uniqueValues(key) {
+      return [...new Set(rawData.map(item => item[key]).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), "zh-CN"));
+    }
+
+    function fillSelect(selectId, values, label) {
+      const select = $(selectId);
+      const currentValue = select.value;
+      select.innerHTML = `<option value="">${label}</option>`;
+
+      values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        select.appendChild(option);
+      });
+
+      if (values.includes(currentValue)) select.value = currentValue;
+    }
+
+    function initFilters() {
+      fillSelect("partTimerSelect", uniqueValues("partTimer"), "全部兼职");
+      fillSelect("statusSelect", uniqueValues("productionStatus"), "全部状态");
+    }
+
+    function matchKeyword(item, keyword) {
+      if (!keyword) return true;
+
+      const text = [
+        item.taskId,
+        item.taskName,
+        item.partTimer,
+        item.subject,
+        item.grade,
+        item.quantity,
+        item.unitPrice,
+        item.productionStatus,
+        item.dueDate,
+        item.qcReviewCompletedDate,
+        item.deductedQuestions,
+        item.inspectionNote,
+        item.commission
+      ].join(" ").toLowerCase();
+
+      return text.includes(keyword.toLowerCase());
+    }
+
+    function inDateRange(item) {
+      const startValue = $("startDateInput").value;
+      const endValue = $("endDateInput").value;
+
+      if (!startValue && !endValue) return true;
+
+      const itemDate = parseDate(item.qcReviewCompletedDate);
+      if (!itemDate) return false;
+
+      const start = startValue ? parseDate(startValue) : null;
+      const end = endValue ? parseDate(endValue) : null;
+
+      if (start && itemDate < start) return false;
+      if (end && itemDate > end) return false;
+      return true;
+    }
+
+    function applyFilters() {
+      const keyword = $("keywordInput").value.trim();
+      const taskId = $("taskIdInput").value.trim().toLowerCase();
+      const partTimer = $("partTimerSelect").value;
+      const status = $("statusSelect").value;
+
+      current = rawData.filter(item => {
+        return matchKeyword(item, keyword)
+          && (!taskId || String(item.taskId).toLowerCase().includes(taskId))
+          && (!partTimer || item.partTimer === partTimer)
+          && (!status || item.productionStatus === status)
+          && inDateRange(item);
+      });
+
+      renderStats();
+      renderTable(current);
+      renderResultText();
+      renderActiveLine();
+    }
+
+    function renderStats() {
+      const quantitySum = current.reduce((sum, item) => sum + toNumber(item.quantity), 0);
+      const deductedSum = current.reduce((sum, item) => sum + toNumber(item.deductedQuestions), 0);
+      const commissionSum = current.reduce((sum, item) => sum + toNumber(item.commission), 0);
+      const doneCount = current.filter(item => isDone(item.productionStatus)).length;
+
+      $("totalCount").textContent = formatNumber(rawData.length);
+      $("filteredCount").textContent = formatNumber(current.length);
+      $("quantitySum").textContent = formatNumber(quantitySum);
+      $("deductedSum").textContent = formatNumber(deductedSum);
+      $("commissionSum").textContent = formatMoney(commissionSum);
+      $("doneCount").textContent = formatNumber(doneCount);
+    }
+
+    function renderResultText() {
+      $("resultText").textContent = `共 ${formatNumber(rawData.length)} 条任务，当前筛选 ${formatNumber(current.length)} 条`;
+    }
+
+    function renderActiveLine() {
+      const tags = [];
+      const keyword = $("keywordInput").value.trim();
+      const taskId = $("taskIdInput").value.trim();
+      const partTimer = $("partTimerSelect").value;
+      const status = $("statusSelect").value;
+      const start = $("startDateInput").value;
+      const end = $("endDateInput").value;
+
+      if (keyword) tags.push(`关键词：${keyword}`);
+      if (taskId) tags.push(`任务ID：${taskId}`);
+      if (partTimer) tags.push(`兼职：${partTimer}`);
+      if (status) tags.push(`任务状态：${status}`);
+      if (start || end) tags.push(`质检审核完成日期：${start || "不限"} 至 ${end || "不限"}`);
+
+      $("activeLine").innerHTML = tags.length
+        ? tags.map(tag => `<span class="active-tag">${tag}</span>`).join("")
+        : "当前未限制筛选条件";
+    }
+
+    function setActiveChip(range) {
+      document.querySelectorAll(".chip[data-range]").forEach(button => {
+        button.classList.toggle("active", button.dataset.range === range);
+      });
+    }
+
+    function getBaseDateForQuickRange() {
+      return new Date();
+    }
+
+    function setQuickRange(range) {
+      const base = getBaseDateForQuickRange();
+      const start = new Date(base);
+      const end = new Date(base);
+
+      if (range === "all") {
+        $("startDateInput").value = "";
+        $("endDateInput").value = "";
+      }
+
+      if (range === "today") {
+        $("startDateInput").value = dateValue(base);
+        $("endDateInput").value = dateValue(base);
+      }
+
+      if (range === "7days") {
+        start.setDate(base.getDate() - 6);
+        $("startDateInput").value = dateValue(start);
+        $("endDateInput").value = dateValue(end);
+      }
+
+      if (range === "month") {
+        const first = new Date(base.getFullYear(), base.getMonth(), 1);
+        $("startDateInput").value = dateValue(first);
+        $("endDateInput").value = dateValue(end);
+      }
+
+      if (range === "lastMonth") {
+        const first = new Date(base.getFullYear(), base.getMonth() - 1, 1);
+        const last = new Date(base.getFullYear(), base.getMonth(), 0);
+        $("startDateInput").value = dateValue(first);
+        $("endDateInput").value = dateValue(last);
+      }
+
+      setActiveChip(range);
+      applyFilters();
+    }
+
+    function resetFilters() {
+      $("keywordInput").value = "";
+      $("taskIdInput").value = "";
+      $("partTimerSelect").value = "";
+      $("statusSelect").value = "";
+      $("startDateInput").value = "";
+      $("endDateInput").value = "";
+      setActiveChip("all");
+      applyFilters();
+      toast("筛选已清空");
+    }
+
+    function escapeCSV(value) {
+      return `"${String(value ?? "").replaceAll('"', '""')}"`;
+    }
+
+    function downloadCSV() {
+      const headers = exportFields.map(field => field[1]);
+      const rows = current.map(item => exportFields.map(field => item[field[0]] || ""));
+
+      const csv = [headers, ...rows]
+        .map(row => row.map(escapeCSV).join(","))
+        .join("\n");
+
+      const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = `兼职任务查询结果_${dateValue(new Date())}.csv`;
+      link.click();
+
+      URL.revokeObjectURL(url);
+      toast(`已导出 ${formatNumber(current.length)} 条`);
+    }
+
+    async function copySummary() {
+      const quantitySum = current.reduce((sum, item) => sum + toNumber(item.quantity), 0);
+      const deductedSum = current.reduce((sum, item) => sum + toNumber(item.deductedQuestions), 0);
+      const commissionSum = current.reduce((sum, item) => sum + toNumber(item.commission), 0);
+
+      const text = [
+        "兼职任务查询摘要",
+        `当前任务：${current.length}`,
+        `题量合计：${formatNumber(quantitySum)}`,
+        `扣题合计：${formatNumber(deductedSum)}`,
+        `提成合计：${formatMoney(commissionSum)}`,
+        `兼职：${$("partTimerSelect").value || "全部"}`,
+        `任务状态：${$("statusSelect").value || "全部"}`,
+        `任务ID：${$("taskIdInput").value || "未指定"}`,
+        `关键词：${$("keywordInput").value || "未指定"}`,
+        `质检审核完成日期：${$("startDateInput").value || "不限"} 至 ${$("endDateInput").value || "不限"}`
+      ].join("\n");
+
+      try {
+        await navigator.clipboard.writeText(text);
+        toast("筛选摘要已复制");
+      } catch (error) {
+        toast("复制失败，可导出 CSV");
+      }
+    }
+
+    function toast(message) {
+      const el = $("toast");
+      el.textContent = message;
+      el.classList.add("show");
+      clearTimeout(window.__toastTimer);
+      window.__toastTimer = setTimeout(() => el.classList.remove("show"), 1800);
+    }
+
+    async function loadData() {
+      try {
+        const response = await fetch("data.json", { cache: "no-store" });
+        if (!response.ok) throw new Error("data.json 读取失败");
+
+        const json = await response.json();
+        const list = Array.isArray(json) ? json : (json.data || json.rows || json.records || []);
+
+        rawData = list.map(normalizeItem);
+        current = [...rawData];
+
+        initFilters();
+        applyFilters();
+        toast("数据已更新");
+      } catch (error) {
+        console.error(error);
+        rawData = [];
+        current = [];
+        initFilters();
+        applyFilters();
+        $("resultText").textContent = "未读取到 data.json，请检查文件是否在同一目录";
+        $("emptyState").hidden = false;
+      }
+    }
+
+    function bindEvents() {
+      ["keywordInput", "taskIdInput", "partTimerSelect", "statusSelect"].forEach(id => {
+        $(id).addEventListener("input", applyFilters);
+      });
+
+      ["startDateInput", "endDateInput"].forEach(id => {
+        $(id).addEventListener("input", () => {
+          setActiveChip("");
+          applyFilters();
+        });
+      });
+
+      document.querySelectorAll(".chip[data-range]").forEach(button => {
+        button.addEventListener("click", () => setQuickRange(button.dataset.range));
+      });
+
+      $("resetBtn").addEventListener("click", resetFilters);
+      $("exportBtn").addEventListener("click", downloadCSV);
+      $("copySummaryBtn").addEventListener("click", copySummary);
+
+      $("backTopBtn").addEventListener("click", () => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+
+      window.addEventListener("scroll", () => {
+        $("backTopBtn").classList.toggle("show", window.scrollY > 420);
+      });
+    }
+
+    bindEvents();
+    loadData();
+  </script>
 </body>
 </html>
