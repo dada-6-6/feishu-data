@@ -199,7 +199,9 @@ def main():
     print(f"  筛选后剩余 {len(data)} 条（跳过 {skipped} 条）")
     
     # 4. 写入文件
-    os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
+    output_dir = os.path.dirname(OUTPUT_PATH)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
     
