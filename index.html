@@ -1,325 +1,557 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>兼职任务查询案例</title>
-  <style>
-    :root {
-      --bg: #f6f7fb;
-      --card: #ffffff;
-      --text: #172033;
-      --muted: #6b7280;
-      --line: #e5e7eb;
-      --brand: #2563eb;
-      --brand-soft: #eff6ff;
-      --ok: #16a34a;
-      --warn: #d97706;
-      --bad: #dc2626;
-      --shadow: 0 12px 30px rgba(15, 23, 42, .08);
-      --radius: 18px;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
-      background: radial-gradient(circle at top left, #e0edff, transparent 28rem), var(--bg);
-      color: var(--text);
-    }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 18px 48px; }
-    header {
-      display: flex; align-items: flex-start; justify-content: space-between; gap: 18px;
-      margin-bottom: 20px;
-    }
-    h1 { margin: 0 0 8px; font-size: clamp(26px, 4vw, 40px); letter-spacing: -0.04em; }
-    .sub { color: var(--muted); margin: 0; line-height: 1.65; }
-    .pill {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px;
-      background: rgba(255,255,255,.72); color: var(--muted); white-space: nowrap;
-      font-size: 13px;
-    }
-    .grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; margin: 20px 0; }
-    .card {
-      background: rgba(255,255,255,.86); border: 1px solid rgba(229,231,235,.9);
-      border-radius: var(--radius); box-shadow: var(--shadow); padding: 18px;
-      backdrop-filter: blur(8px);
-    }
-    .metric .label { color: var(--muted); font-size: 13px; }
-    .metric .num { font-size: 30px; font-weight: 800; margin-top: 8px; letter-spacing: -0.04em; }
-    .toolbar { display: grid; grid-template-columns: 2fr repeat(4, 1fr); gap: 10px; align-items: end; }
-    label { display: block; font-size: 12px; color: var(--muted); margin: 0 0 6px 2px; }
-    input, select {
-      width: 100%; border: 1px solid var(--line); border-radius: 14px; padding: 12px 12px;
-      background: #fff; color: var(--text); outline: none; font-size: 14px;
-    }
-    input:focus, select:focus { border-color: var(--brand); box-shadow: 0 0 0 4px var(--brand-soft); }
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; }
-    button {
-      border: 0; border-radius: 14px; padding: 11px 14px; cursor: pointer;
-      font-weight: 700; background: var(--brand); color: white;
-    }
-    button.secondary { background: #fff; color: var(--text); border: 1px solid var(--line); }
-    .result-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 18px 0 10px; color: var(--muted); }
-    .table-card { overflow: hidden; padding: 0; }
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; min-width: 1050px; }
-    th, td { padding: 13px 14px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; font-size: 14px; }
-    th { background: #f9fafb; color: #374151; font-size: 12px; position: sticky; top: 0; z-index: 1; }
-    tr:hover td { background: #fafcff; }
-    .status {
-      display: inline-flex; padding: 4px 9px; border-radius: 999px; font-size: 12px; font-weight: 700;
-      background: #f3f4f6; color: #374151; white-space: nowrap;
-    }
-    .status.done { background: #ecfdf5; color: var(--ok); }
-    .status.work { background: #fff7ed; color: var(--warn); }
-    .status.fail { background: #fef2f2; color: var(--bad); }
-    .task { font-weight: 750; max-width: 320px; }
-    .muted { color: var(--muted); }
-    .empty { padding: 36px; text-align: center; color: var(--muted); }
-    .hint { font-size: 13px; color: var(--muted); line-height: 1.6; margin-top: 12px; }
-    @media (max-width: 900px) {
-      header { display: block; }
-      .pill { margin-top: 14px; }
-      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .toolbar { grid-template-columns: 1fr 1fr; }
-      .toolbar > div:first-child { grid-column: 1 / -1; }
-    }
-    @media (max-width: 560px) {
-      .grid, .toolbar { grid-template-columns: 1fr; }
-    }
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>兼职任务查询看板</title>
+<style>
+:root{
+  --bg:#f0f4f8;--card:#fff;--text:#1e293b;--muted:#64748b;--line:#e2e8f0;
+  --brand:#3b82f6;--brand-soft:#eff6ff;--ok:#16a34a;--ok-bg:#dcfce7;
+  --warn:#d97706;--warn-bg:#fef3c7;--bad:#dc2626;--bad-bg:#fee2e2;
+  --info:#2563eb;--info-bg:#dbeafe;--gray:#94a3b8;--gray-bg:#f1f5f9;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+  --radius:14px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Microsoft YaHei","PingFang SC",sans-serif;background:linear-gradient(135deg,#e0eafc 0%,#cfdef3 50%,#e8ecf1 100%);color:var(--text);min-height:100vh}
+.wrap{max-width:1400px;margin:0 auto;padding:20px 16px 60px}
+
+/* === Header === */
+.page-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.page-header h1{font-size:clamp(22px,3.5vw,32px);font-weight:800;letter-spacing:-.02em;background:linear-gradient(135deg,#1e40af,#3b82f6);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.update-tag{font-size:12px;color:var(--muted);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 14px;display:inline-flex;align-items:center;gap:6px}
+
+/* === Stats Cards === */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.stat-card::after{content:'';position:absolute;top:0;left:0;width:4px;height:100%;border-radius:4px 0 0 4px}
+.stat-card.c-total::after{background:var(--brand)}
+.stat-card.c-done::after{background:var(--ok)}
+.stat-card.c-pending::after{background:var(--warn)}
+.stat-card.c-filter::after{background:#8b5cf6}
+.stat-label{font-size:12px;color:var(--muted);margin-bottom:6px}
+.stat-num{font-size:28px;font-weight:800;letter-spacing:-.03em}
+
+/* === Filter Panel === */
+.filter-panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);position:sticky;top:0;z-index:100;margin-bottom:16px}
+.filter-row{display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;margin-bottom:12px}
+.filter-row-2{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:end;margin-bottom:14px}
+.filter-group label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px;font-weight:600}
+.filter-group input,.filter-group select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px;background:#fff;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s}
+.filter-group input:focus,.filter-group select:focus{border-color:var(--brand);box-shadow:0 0 0 3px var(--brand-soft)}
+.filter-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.date-shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.date-shortcuts button{padding:6px 14px;font-size:12px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-weight:600;transition:all .2s}
+.date-shortcuts button:hover,.date-shortcuts button.active{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* === Buttons === */
+.btn{border:0;border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:700;font-size:13px;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--brand);color:#fff}
+.btn-primary:hover{background:#2563eb}
+.btn-outline{background:#fff;color:var(--text);border:1.5px solid var(--line)}
+.btn-outline:hover{background:#f8fafc;border-color:#cbd5e1}
+.btn-success{background:var(--ok);color:#fff}
+.btn-success:hover{background:#15803d}
+
+/* === Result bar === */
+.result-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px}
+.result-count{font-size:14px;color:var(--muted);font-weight:600}
+.result-count span{color:var(--brand);font-weight:800;font-size:18px}
+
+/* === Table === */
+.table-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:1200px}
+thead{position:sticky;top:0;z-index:10}
+th{background:#f8fafc;padding:12px 14px;text-align:left;font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:11px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:middle}
+tbody tr{transition:background .15s}
+tbody tr:hover{background:#f0f7ff}
+tbody tr:nth-child(even){background:#fafbfc}
+tbody tr:nth-child(even):hover{background:#f0f7ff}
+.task-name{font-weight:700;max-width:280px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* === Status Tags === */
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;white-space:nowrap}
+.tag-done{background:var(--ok-bg);color:var(--ok)}
+.tag-work{background:var(--info-bg);color:var(--info)}
+.tag-warn{background:var(--warn-bg);color:var(--warn)}
+.tag-bad{background:var(--bad-bg);color:var(--bad)}
+.tag-gray{background:var(--gray-bg);color:var(--gray)}
+
+/* === Empty === */
+.empty-state{padding:48px 24px;text-align:center;color:var(--muted)}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+
+/* === Back to top === */
+.back-top{position:fixed;bottom:32px;right:32px;width:48px;height:48px;border-radius:50%;background:var(--brand);color:#fff;border:0;cursor:pointer;font-size:20px;box-shadow:0 4px 14px rgba(59,130,246,.35);display:none;align-items:center;justify-content:center;z-index:999;transition:transform .2s,opacity .2s}
+.back-top:hover{transform:scale(1.1)}
+.back-top.show{display:flex}
+
+/* === Mobile cards === */
+.mobile-cards{display:none}
+.mobile-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:10px;box-shadow:var(--shadow)}
+.mobile-card .mc-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.mobile-card .mc-task{font-weight:700;font-size:14px;flex:1;margin-right:10px}
+.mobile-card .mc-row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;border-bottom:1px solid #f1f5f9}
+.mobile-card .mc-row:last-child{border-bottom:0}
+.mobile-card .mc-label{color:var(--muted);flex-shrink:0;margin-right:10px}
+.mobile-card .mc-value{font-weight:600;text-align:right;word-break:break-all}
+
+/* === Responsive === */
+@media(max-width:900px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .filter-row{grid-template-columns:1fr}
+  .filter-row-2{grid-template-columns:1fr 1fr}
+  .table-wrap{display:none}
+  .mobile-cards{display:block}
+}
+@media(max-width:560px){
+  .stats-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .stat-num{font-size:22px}
+  .filter-row-2{grid-template-columns:1fr}
+  .page-header{flex-direction:column;align-items:flex-start}
+  .back-top{bottom:20px;right:16px;width:40px;height:40px;font-size:16px}
+}
+</style>
 </head>
 <body>
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>兼职任务查询案例</h1>
-        <p class="sub">数据来自 <code>data.json</code>。可以按任务ID、任务名称、兼职、学科、年级、状态等快速查询。</p>
-      </div>
-      <div class="pill" id="lastUpdate">读取数据中...</div>
-    </header>
 
-    <section class="grid">
-      <div class="card metric"><div class="label">任务总数</div><div class="num" id="mTotal">-</div></div>
-      <div class="card metric"><div class="label">已完成</div><div class="num" id="mDone">-</div></div>
-      <div class="card metric"><div class="label">分配成功</div><div class="num" id="mAssigned">-</div></div>
-      <div class="card metric"><div class="label">兼职人数</div><div class="num" id="mPeople">-</div></div>
-    </section>
-
-    <section class="card">
-      <div class="toolbar">
-        <div>
-          <label for="q">关键词</label>
-          <input id="q" placeholder="输入任务ID、名称、兼职、商家、需求ID..." autocomplete="off" />
-        </div>
-        <div>
-          <label for="partTimer">兼职</label>
-          <select id="partTimer"><option value="">全部兼职</option></select>
-        </div>
-        <div>
-          <label for="subject">学科</label>
-          <select id="subject"><option value="">全部学科</option></select>
-        </div>
-        <div>
-          <label for="grade">年级</label>
-          <select id="grade"><option value="">全部年级</option></select>
-        </div>
-        <div>
-          <label for="status">制作状态</label>
-          <select id="status"><option value="">全部状态</option></select>
-        </div>
-      </div>
-      <div class="actions">
-        <button id="btnSearch">查询</button>
-        <button class="secondary" id="btnReset">重置</button>
-        <button class="secondary" id="btnExport">导出当前结果 CSV</button>
-      </div>
-      <p class="hint">上线后只需要替换同目录的 <code>data.json</code>，页面会自动读取新数据；不需要改 HTML。</p>
-    </section>
-
-    <div class="result-head">
-      <div id="countText">共 0 条</div>
-      <div class="muted">示例字段已做筛选，避免把原表全部字段直接暴露到前台。</div>
-    </div>
-
-    <section class="card table-card">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>任务ID</th>
-              <th>任务名称</th>
-              <th>兼职</th>
-              <th>状态</th>
-              <th>学科/年级</th>
-              <th>题量</th>
-              <th>交付日期</th>
-              <th>创建/质检</th>
-              <th>商家</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-        </table>
-      </div>
-      <div id="empty" class="empty" hidden>没有匹配的数据</div>
-    </section>
+<div class="wrap">
+  <!-- Header -->
+  <div class="page-header">
+    <h1>📋 兼职任务查询看板</h1>
+    <span class="update-tag" id="lastUpdate">读取中...</span>
   </div>
 
-  <script>
-    let allData = [];
-    let current = [];
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card c-total"><div class="stat-label">任务总数</div><div class="stat-num" id="sTotal">-</div></div>
+    <div class="stat-card c-done"><div class="stat-label">已完成</div><div class="stat-num" id="sDone">-</div></div>
+    <div class="stat-card c-pending"><div class="stat-label">待处理</div><div class="stat-num" id="sPending">-</div></div>
+    <div class="stat-card c-filter"><div class="stat-label">当前筛选结果</div><div class="stat-num" id="sFiltered">-</div></div>
+  </div>
 
-    const $ = (id) => document.getElementById(id);
-    const text = (value) => value === undefined || value === null || value === '' ? '-' : String(value);
+  <!-- Filter Panel -->
+  <div class="filter-panel">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>兼职筛选</label>
+        <select id="fPartTimer"><option value="">全部兼职</option></select>
+      </div>
+      <div class="filter-group">
+        <label>任务ID</label>
+        <input id="fTaskId" placeholder="输入任务ID，支持模糊搜索" autocomplete="off">
+      </div>
+      <div class="filter-group">
+        <label>关键词搜索</label>
+        <input id="fKeyword" placeholder="搜索任务ID、名称、兼职、学科、年级、状态、备注..." autocomplete="off">
+      </div>
+    </div>
+    <div class="date-shortcuts">
+      <button data-range="all" class="active">全部</button>
+      <button data-range="today">今天</button>
+      <button data-range="week">最近7天</button>
+      <button data-range="month">本月</button>
+      <button data-range="lastMonth">上月</button>
+    </div>
+    <div class="filter-row-2">
+      <div class="filter-group">
+        <label>质检完成日期 起</label>
+        <input id="fDateFrom" type="date">
+      </div>
+      <div class="filter-group">
+        <label>质检完成日期 止</label>
+        <input id="fDateTo" type="date">
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" id="btnSearch">🔍 查询</button>
+        <button class="btn btn-outline" id="btnReset">✖ 清空筛选</button>
+        <button class="btn btn-success" id="btnExport">📥 导出CSV</button>
+      </div>
+    </div>
+  </div>
 
-    function statusClass(value) {
-      const v = String(value || '');
-      if (v.includes('完成') || v.includes('成功')) return 'done';
-      if (v.includes('失败') || v.includes('驳回')) return 'fail';
-      if (v.includes('排版') || v.includes('等待') || v.includes('分配中')) return 'work';
-      return '';
+  <!-- Result bar -->
+  <div class="result-bar">
+    <div class="result-count" id="countText">共 <span>0</span> 条</div>
+  </div>
+
+  <!-- Table (desktop) -->
+  <div class="table-card">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>任务ID</th>
+            <th>任务名称</th>
+            <th>兼职</th>
+            <th>学科</th>
+            <th>年级</th>
+            <th>题量</th>
+            <th>制作状态</th>
+            <th>交付日期</th>
+            <th>质检交付完成日期</th>
+            <th>扣题</th>
+            <th>抽检备注</th>
+            <th>提成</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    <div id="emptyState" class="empty-state" hidden>
+      <div class="icon">🔍</div>
+      <div>没有匹配的数据</div>
+    </div>
+  </div>
+
+  <!-- Mobile cards -->
+  <div class="mobile-cards" id="mobileCards"></div>
+</div>
+
+<!-- Back to top -->
+<button class="back-top" id="btnTop" title="返回顶部">↑</button>
+
+<script>
+(function(){
+  'use strict';
+
+  // ==================== 全局状态 ====================
+  let allData = [];
+  let filtered = [];
+
+  const $ = id => document.getElementById(id);
+
+  // ==================== 字段映射 ====================
+  // data.json 原始字段 → 页面统一字段名
+  const FIELD_MAP = {
+    taskId: 'taskId',
+    taskName: 'taskName',
+    partTimer: 'partTimer',
+    subject: 'subject',
+    grade: 'grade',
+    quantity: 'quantity',
+    productionStatus: 'productionStatus',
+    dueDate: 'dueDate',
+    qcCompletedDate: 'qcCompletedDate',
+    deductedQuestions: 'deductedQuestions',
+    inspectionNote: 'inspectionNote',
+    commission: 'commission'
+  };
+
+  // data.json 字段名映射（兼容旧数据）
+  const RAW_MAP = {
+    taskId: 'taskId',
+    taskName: 'taskName',
+    partTimer: 'partTimer',
+    subject: 'subject',
+    grade: 'grade',
+    quantity: 'quantity',
+    productionStatus: 'productionStatus',
+    dueDate: 'dueDate',
+    note: 'inspectionNote',       // 旧字段 note → inspectionNote
+    price: 'commission',          // 旧字段 price → commission
+    qcCompletedDate: 'qcCompletedDate',
+    deductedQuestions: 'deductedQuestions',
+    inspectionNote: 'inspectionNote',
+    commission: 'commission'
+  };
+
+  // ==================== 工具函数 ====================
+  function text(v) {
+    return (v === undefined || v === null || v === '') ? '-' : String(v);
+  }
+
+  // 日期解析，兼容多种格式
+  function parseDate(str) {
+    if (!str) return null;
+    const s = String(str).trim();
+    if (!s) return null;
+    let d = new Date(s.replace(/\//g, '-'));
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // 格式化日期为 YYYY-MM-DD
+  function fmtDate(str) {
+    const d = parseDate(str);
+    if (!d) return '-';
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const day = String(d.getDate()).padStart(2,'0');
+    return `${y}-${m}-${day}`;
+  }
+
+  // 状态标签样式
+  function statusClass(v) {
+    const s = String(v || '');
+    if (s.includes('完成')) return 'tag-done';
+    if (s.includes('排版中') || s.includes('进行中')) return 'tag-work';
+    if (s.includes('驳回') || s.includes('退回') || s.includes('失败')) return 'tag-bad';
+    if (s.includes('未开始') || s.includes('待')) return 'tag-warn';
+    return 'tag-gray';
+  }
+
+  // 获取唯一值列表
+  function uniqueValues(data, key) {
+    return [...new Set(data.map(x => x[key]).filter(Boolean))].sort((a,b) => String(a).localeCompare(String(b),'zh-Hans-CN'));
+  }
+
+  // ==================== 字段映射转换 ====================
+  function mapRecord(raw) {
+    const item = {};
+    for (const [srcKey, dstKey] of Object.entries(RAW_MAP)) {
+      item[dstKey] = raw.hasOwnProperty(srcKey) ? raw[srcKey] : '';
     }
+    return item;
+  }
 
-    function optionList(key) {
-      return [...new Set(allData.map(x => x[key]).filter(Boolean))].sort((a,b)=>String(a).localeCompare(String(b),'zh-Hans-CN'));
+  // ==================== 加载数据 ====================
+  async function loadData() {
+    try {
+      const res = await fetch('data.json', { cache: 'no-store' });
+      if (!res.ok) throw new Error('读取失败');
+      const raw = await res.json();
+      // 字段映射
+      allData = raw.map(mapRecord);
+      filtered = [...allData];
+      initFilters();
+      renderStats();
+      applyFilters();
+      $('lastUpdate').textContent = `${allData.length} 条数据 · ${new Date().toLocaleString('zh-CN')}`;
+    } catch(e) {
+      $('lastUpdate').textContent = '数据加载失败';
+      $('emptyState').hidden = false;
+      $('emptyState').innerHTML = '<div class="icon">⚠️</div><div>无法读取 data.json，请确保通过 HTTP 服务器访问此页面。</div>';
     }
+  }
 
-    function fillSelect(id, key, label) {
-      const el = $(id);
-      el.innerHTML = `<option value="">${label}</option>`;
-      optionList(key).forEach(v => {
-        const opt = document.createElement('option');
-        opt.value = v;
-        opt.textContent = v;
-        el.appendChild(opt);
-      });
-    }
+  // ==================== 初始化筛选器 ====================
+  function initFilters() {
+    fillSelect('fPartTimer', 'partTimer', '全部兼职');
+  }
 
-    function renderMetrics(data) {
-      $('mTotal').textContent = data.length;
-      $('mDone').textContent = data.filter(x => String(x.productionStatus).includes('完成')).length;
-      $('mAssigned').textContent = data.filter(x => String(x.allocationStatus).includes('分配成功')).length;
-      $('mPeople').textContent = new Set(data.map(x => x.partTimer).filter(x => x && x !== '未分配')).size;
-    }
+  function fillSelect(id, key, defaultLabel) {
+    const el = $(id);
+    el.innerHTML = `<option value="">${defaultLabel}</option>`;
+    uniqueValues(allData, key).forEach(v => {
+      const opt = document.createElement('option');
+      opt.value = v; opt.textContent = v;
+      el.appendChild(opt);
+    });
+  }
 
-    function matchKeyword(item, q) {
-      if (!q) return true;
-      const haystack = [
-        item.taskId, item.mainTaskId, item.taskName, item.taskType, item.partTimer,
-        item.creator, item.reviewer, item.subject, item.grade, item.productionStatus,
-        item.allocationStatus, item.merchantMain, item.merchantSub, item.requirementId
-      ].join(' ').toLowerCase();
-      return haystack.includes(q.toLowerCase());
-    }
+  // ==================== 统计卡片 ====================
+  function renderStats() {
+    $('sTotal').textContent = allData.length;
+    $('sDone').textContent = allData.filter(x => String(x.productionStatus).includes('完成')).length;
+    $('sPending').textContent = allData.filter(x => !String(x.productionStatus).includes('完成')).length;
+  }
 
-    function applyFilters() {
-      const q = $('q').value.trim();
-      const partTimer = $('partTimer').value;
-      const subject = $('subject').value;
-      const grade = $('grade').value;
-      const status = $('status').value;
-      current = allData.filter(item => {
-        return matchKeyword(item, q)
-          && (!partTimer || item.partTimer === partTimer)
-          && (!subject || item.subject === subject)
-          && (!grade || item.grade === grade)
-          && (!status || item.productionStatus === status);
-      });
-      renderTable(current);
-      renderMetrics(current);
-    }
+  // ==================== 筛选逻辑 ====================
+  function applyFilters() {
+    const partTimer = $('fPartTimer').value;
+    const taskId = $('fTaskId').value.trim().toLowerCase();
+    const keyword = $('fKeyword').value.trim().toLowerCase();
+    const dateFrom = $('fDateFrom').value;
+    const dateTo = $('fDateTo').value;
 
-    function td(content, className = '') {
-      const cell = document.createElement('td');
-      if (className) cell.className = className;
-      if (content instanceof Node) cell.appendChild(content);
-      else cell.textContent = text(content);
-      return cell;
-    }
+    filtered = allData.filter(item => {
+      // 兼职筛选
+      if (partTimer && item.partTimer !== partTimer) return false;
 
-    function renderTable(data) {
-      const body = $('tbody');
-      body.innerHTML = '';
-      $('countText').textContent = `共 ${data.length} 条`;
-      $('empty').hidden = data.length !== 0;
+      // 任务ID模糊搜索
+      if (taskId && !String(item.taskId).toLowerCase().includes(taskId)) return false;
 
-      data.forEach(item => {
-        const tr = document.createElement('tr');
-        const task = document.createElement('div');
-        task.className = 'task';
-        task.textContent = text(item.taskName);
-        const sub = document.createElement('div');
-        sub.className = 'muted';
-        sub.textContent = [item.taskType, item.requirementId ? `需求 ${item.requirementId}` : ''].filter(Boolean).join(' · ');
-        const taskWrap = document.createElement('div');
-        taskWrap.append(task, sub);
+      // 关键词搜索
+      if (keyword) {
+        const haystack = [
+          item.taskId, item.taskName, item.partTimer,
+          item.subject, item.grade, item.productionStatus, item.inspectionNote
+        ].join(' ').toLowerCase();
+        if (!haystack.includes(keyword)) return false;
+      }
 
-        const status = document.createElement('div');
-        status.innerHTML = `
-          <span class="status ${statusClass(item.productionStatus)}"></span>
-          <span class="status ${statusClass(item.allocationStatus)}" style="margin-left:6px"></span>`;
-        status.children[0].textContent = text(item.productionStatus);
-        status.children[1].textContent = text(item.allocationStatus);
+      // 质检交付完成日期筛选
+      if (dateFrom || dateTo) {
+        const d = parseDate(item.qcCompletedDate);
+        if (!d) return false;
+        if (dateFrom) {
+          const from = new Date(dateFrom + 'T00:00:00');
+          if (d < from) return false;
+        }
+        if (dateTo) {
+          const to = new Date(dateTo + 'T23:59:59');
+          if (d > to) return false;
+        }
+      }
 
-        tr.append(
-          td(item.taskId),
-          td(taskWrap),
-          td(item.partTimer),
-          td(status),
-          td(`${text(item.subject)} / ${text(item.grade)}`),
-          td(item.quantity),
-          td(item.dueDate || item.videoDueDate),
-          td(`${text(item.creator)} / ${text(item.reviewer)}`),
-          td(item.merchantSub || item.merchantMain)
-        );
-        body.appendChild(tr);
-      });
-    }
+      return true;
+    });
 
-    function downloadCSV() {
-      const headers = ['任务ID','任务名称','兼职','制作状态','分配状态','学科','年级','题量','交付日期','创建人','质检人','商家'];
-      const rows = current.map(x => [x.taskId,x.taskName,x.partTimer,x.productionStatus,x.allocationStatus,x.subject,x.grade,x.quantity,x.dueDate || x.videoDueDate,x.creator,x.reviewer,x.merchantSub || x.merchantMain]);
-      const csv = [headers, ...rows].map(row => row.map(v => `"${String(v ?? '').replaceAll('"','""')}"`).join(',')).join('\n');
-      const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = '兼职任务查询结果.csv';
-      a.click();
-      URL.revokeObjectURL(a.href);
-    }
+    $('sFiltered').textContent = filtered.length;
+    renderTable(filtered);
+    renderMobileCards(filtered);
+    $('countText').innerHTML = `共 <span>${allData.length}</span> 条任务，当前筛选 <span>${filtered.length}</span> 条`;
+    $('emptyState').hidden = filtered.length !== 0;
+  }
 
-    async function init() {
-      try {
-        const res = await fetch('data.json', { cache: 'no-store' });
-        if (!res.ok) throw new Error('data.json 读取失败');
-        allData = await res.json();
-        current = [...allData];
-        fillSelect('partTimer', 'partTimer', '全部兼职');
-        fillSelect('subject', 'subject', '全部学科');
-        fillSelect('grade', 'grade', '全部年级');
-        fillSelect('status', 'productionStatus', '全部状态');
-        renderMetrics(current);
-        renderTable(current);
-        $('lastUpdate').textContent = `已载入 ${allData.length} 条数据 · ${new Date().toLocaleString('zh-CN')}`;
-      } catch (err) {
-        $('lastUpdate').textContent = '无法直接读取 data.json';
-        $('empty').hidden = false;
-        $('empty').innerHTML = '请把本文件夹放到网站服务器，或在本地目录运行 <code>python3 -m http.server 8000</code> 后访问 <code>http://localhost:8000</code>。';
+  // ==================== 渲染表格 ====================
+  function renderTable(data) {
+    const tbody = $('tbody');
+    tbody.innerHTML = '';
+
+    data.forEach(item => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:700">${text(item.taskId)}</td>
+        <td><div class="task-name" title="${text(item.taskName)}">${text(item.taskName)}</div></td>
+        <td>${text(item.partTimer)}</td>
+        <td>${text(item.subject)}</td>
+        <td>${text(item.grade)}</td>
+        <td>${text(item.quantity)}</td>
+        <td><span class="tag ${statusClass(item.productionStatus)}">${text(item.productionStatus)}</span></td>
+        <td>${fmtDate(item.dueDate)}</td>
+        <td>${fmtDate(item.qcCompletedDate)}</td>
+        <td>${text(item.deductedQuestions)}</td>
+        <td title="${text(item.inspectionNote)}">${text(item.inspectionNote).length > 20 ? text(item.inspectionNote).slice(0,20)+'…' : text(item.inspectionNote)}</td>
+        <td>${text(item.commission)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ==================== 渲染手机卡片 ====================
+  function renderMobileCards(data) {
+    const container = $('mobileCards');
+    container.innerHTML = '';
+
+    data.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'mobile-card';
+      card.innerHTML = `
+        <div class="mc-header">
+          <div class="mc-task" title="${text(item.taskName)}">${text(item.taskId)} - ${text(item.taskName)}</div>
+          <span class="tag ${statusClass(item.productionStatus)}">${text(item.productionStatus)}</span>
+        </div>
+        <div class="mc-row"><span class="mc-label">兼职</span><span class="mc-value">${text(item.partTimer)}</span></div>
+        <div class="mc-row"><span class="mc-label">学科/年级</span><span class="mc-value">${text(item.subject)} / ${text(item.grade)}</span></div>
+        <div class="mc-row"><span class="mc-label">题量</span><span class="mc-value">${text(item.quantity)}</span></div>
+        <div class="mc-row"><span class="mc-label">交付日期</span><span class="mc-value">${fmtDate(item.dueDate)}</span></div>
+        <div class="mc-row"><span class="mc-label">质检完成日期</span><span class="mc-value">${fmtDate(item.qcCompletedDate)}</span></div>
+        <div class="mc-row"><span class="mc-label">扣题</span><span class="mc-value">${text(item.deductedQuestions)}</span></div>
+        <div class="mc-row"><span class="mc-label">备注</span><span class="mc-value">${text(item.inspectionNote).length > 40 ? text(item.inspectionNote).slice(0,40)+'…' : text(item.inspectionNote)}</span></div>
+        <div class="mc-row"><span class="mc-label">提成</span><span class="mc-value">${text(item.commission)}</span></div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  // ==================== 重置筛选 ====================
+  function resetFilters() {
+    $('fPartTimer').value = '';
+    $('fTaskId').value = '';
+    $('fKeyword').value = '';
+    $('fDateFrom').value = '';
+    $('fDateTo').value = '';
+    // 重置日期快捷按钮
+    document.querySelectorAll('.date-shortcuts button').forEach(b => b.classList.remove('active'));
+    document.querySelector('.date-shortcuts button[data-range="all"]').classList.add('active');
+    applyFilters();
+  }
+
+  // ==================== 导出 CSV ====================
+  function downloadCSV() {
+    if (filtered.length === 0) { alert('当前没有数据可导出'); return; }
+    const headers = ['任务ID','任务名称','兼职','学科','年级','题量','制作状态','交付日期','质检交付完成日期','扣题','抽检备注','提成'];
+    const keys = ['taskId','taskName','partTimer','subject','grade','quantity','productionStatus','dueDate','qcCompletedDate','deductedQuestions','inspectionNote','commission'];
+    const rows = filtered.map(item => keys.map(k => {
+      let v = item[k];
+      if (k === 'dueDate' || k === 'qcCompletedDate') v = fmtDate(v);
+      return `"${String(v ?? '').replace(/"/g,'""')}"`;
+    }));
+    const csv = [headers.map(h => `"${h}"`).join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `兼职任务查询_${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  // ==================== 返回顶部 ====================
+  function scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ==================== 日期快捷按钮 ====================
+  function setDateRange(range) {
+    const today = new Date();
+    $('fDateFrom').value = '';
+    $('fDateTo').value = '';
+
+    switch(range) {
+      case 'today': {
+        const d = fmtDate(today.toISOString());
+        $('fDateFrom').value = d;
+        $('fDateTo').value = d;
+        break;
+      }
+      case 'week': {
+        const from = new Date(today);
+        from.setDate(from.getDate() - 6);
+        $('fDateFrom').value = fmtDate(from.toISOString());
+        $('fDateTo').value = fmtDate(today.toISOString());
+        break;
+      }
+      case 'month': {
+        $('fDateFrom').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-01`;
+        $('fDateTo').value = fmtDate(today.toISOString());
+        break;
+      }
+      case 'lastMonth': {
+        const lm = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+        const lmEnd = new Date(today.getFullYear(), today.getMonth(), 0);
+        $('fDateFrom').value = `${lm.getFullYear()}-${String(lm.getMonth()+1).padStart(2,'0')}-01`;
+        $('fDateTo').value = `${lmEnd.getFullYear()}-${String(lmEnd.getMonth()+1).padStart(2,'0')}-${String(lmEnd.getDate()).padStart(2,'0')}`;
+        break;
       }
     }
+    applyFilters();
+  }
 
-    $('btnSearch').addEventListener('click', applyFilters);
-    $('btnReset').addEventListener('click', () => {
-      ['q','partTimer','subject','grade','status'].forEach(id => $(id).value = '');
-      applyFilters();
-    });
-    $('btnExport').addEventListener('click', downloadCSV);
-    ['q','partTimer','subject','grade','status'].forEach(id => {
-      $(id).addEventListener(id === 'q' ? 'input' : 'change', applyFilters);
-    });
+  // ==================== 事件绑定 ====================
+  $('btnSearch').addEventListener('click', applyFilters);
+  $('btnReset').addEventListener('click', resetFilters);
+  $('btnExport').addEventListener('click', downloadCSV);
+  $('btnTop').addEventListener('click', scrollToTop);
 
-    init();
-  </script>
+  // 输入实时筛选
+  $('fPartTimer').addEventListener('change', applyFilters);
+  $('fTaskId').addEventListener('input', applyFilters);
+  $('fKeyword').addEventListener('input', applyFilters);
+  $('fDateFrom').addEventListener('change', applyFilters);
+  $('fDateTo').addEventListener('change', applyFilters);
+
+  // 日期快捷按钮
+  document.querySelectorAll('.date-shortcuts button').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.date-shortcuts button').forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      setDateRange(this.dataset.range);
+    });
+  });
+
+  // 返回顶部按钮显隐
+  window.addEventListener('scroll', () => {
+    $('btnTop').classList.toggle('show', window.scrollY > 400);
+  });
+
+  // ==================== 启动 ====================
+  loadData();
+
+})();
+</script>
 </body>
 </html>
