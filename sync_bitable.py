@@ -8,7 +8,10 @@ import requests
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
+
+# 飞书 DateTime 字段返回 UTC 时间戳，统一转换为东八区（UTC+8）显示
+TZ_CN = timezone(timedelta(hours=8))
 
 # ============ 配置 ============
 # 优先从环境变量读取（GitHub Actions 使用），否则用默认值（本地运行）
@@ -92,22 +95,22 @@ def convert_value(field_name, value):
             return str(value[0])
         return ""
     
-    # DateTime 字段（毫秒时间戳 → "2026-04-21"）
+    # DateTime 字段（毫秒时间戳 → "2026-04-21"，强制 UTC+8）
     if field_name in DATETIME_FIELDS:
         try:
             ts = int(value)
             if ts > 0:
-                return datetime.fromtimestamp(ts / 1000).strftime("%Y-%m-%d %H:%M")
+                return datetime.fromtimestamp(ts / 1000, tz=TZ_CN).strftime("%Y-%m-%d %H:%M")
             return ""
         except (ValueError, TypeError, OSError):
             return ""
     
-    # ModifiedTime 字段
+    # ModifiedTime 字段（毫秒时间戳 → "2026-04-21"，强制 UTC+8）
     if field_name in MODIFIED_TIME_FIELDS:
         try:
             ts = int(value)
             if ts > 0:
-                return datetime.fromtimestamp(ts / 1000).strftime("%Y-%m-%d %H:%M")
+                return datetime.fromtimestamp(ts / 1000, tz=TZ_CN).strftime("%Y-%m-%d %H:%M")
             return ""
         except (ValueError, TypeError, OSError):
             return ""
