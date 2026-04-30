@@ -184,19 +184,26 @@ def main():
     records = fetch_all_records(token)
     print(f"  共拉取 {len(records)} 条原始记录")
     
-    # 3. 按制作状态筛选 + 转换格式
+    # 3. 按制作状态筛选 + PPT兼职为空跳过 + 转换格式
     print(f"  筛选状态: {', '.join(ALLOWED_STATUSES)}")
     data = []
-    skipped = 0
+    skipped_status = 0
+    skipped_no_parttimer = 0
     for rec in records:
+        # 跳过不符合状态的记录
         status = rec.get("fields", {}).get("制作状态", "")
         if status not in ALLOWED_STATUSES:
-            skipped += 1
+            skipped_status += 1
+            continue
+        # 跳过 PPT兼职为空的记录
+        part_timer = rec.get("fields", {}).get("PPT兼职", "")
+        if not part_timer or (isinstance(part_timer, str) and not part_timer.strip()):
+            skipped_no_parttimer += 1
             continue
         item = record_to_json(rec)
         data.append(item)
     
-    print(f"  筛选后剩余 {len(data)} 条（跳过 {skipped} 条）")
+    print(f"  筛选后剩余 {len(data)} 条（跳过状态不符 {skipped_status} 条，PPT兼职为空 {skipped_no_parttimer} 条）")
     
     # 4. 写入文件
     output_dir = os.path.dirname(OUTPUT_PATH)
