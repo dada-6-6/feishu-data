@@ -5,6 +5,8 @@
 """
 
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import json
 import os
 import sys
@@ -71,10 +73,26 @@ MODIFIED_TIME_FIELDS = {"任务分配时间"}
 ALLOWED_STATUSES = {"排版中", "已完成", "排版内部驳回待修改"}
 
 
-def get_tenant_token():
+def make_session():
+    """创建带自动重试的 requests Session（最多重试 3 次，指数退避）"""
+    session = requests.Session()
+    retry = Retry(
+        total=3,
+        backoff_factor=2,          # 重试间隔：2s, 4s, 8s
+        status_forcelist=[500, 502, 503, 504],
+        allowed_methods=["GET", "POST"],
+        raise_on_status=False,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount("https://", adapter)
+    session.mount("http://", adapter)
+    return session
+
+
+def get_tenant_token(session):
     """获取 tenant_access_token"""
     url = "https://open.feishu.cn/open-apis/auth/v3/tenant_access_token/internal"
-    resp = requests.post(url, json={"app_id": APP_ID, "app_secret": APP_SECRET}, timeout=30)
+    resp = session.post(url, json={"app_id": APP_ID, "app_secret": APP_SECRET}, timeout=60)
     data = resp.json()
     if data.get("code") != 0:
         print(f"[ERROR] 获取 token 失败: {data}")
@@ -128,7 +146,7 @@ def convert_value(field_name, value):
     return value
 
 
-def fetch_all_records(token):
+def fetch_all_records(session, token):
     """分页拉取所有记录"""
     url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{APP_TOKEN}/tables/{TABLE_ID}/records"
     headers = {"Authorization": f"Bearer {token}"}
@@ -142,7 +160,7 @@ def fetch_all_records(token):
         if page_token:
             params["page_token"] = page_token
         
-        resp = requests.get(url, headers=headers, params=params, timeout=30)
+        resp = session.get(url, headers=headers, params=params, timeout=60)
         data = resp.json()
         
         if data.get("code") != 0:
@@ -177,14 +195,17 @@ def record_to_json(record):
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 开始同步飞书多维表数据...")
     
+    # 0. 创建带重试的 session
+    session = make_session()
+    
     # 1. 获取 token
     print("  获取 token...")
-    token = get_tenant_token()
+    token = get_tenant_token(session)
     print("  Token OK")
     
     # 2. 拉取记录并筛选
     print("  拉取多维表记录...")
-    records = fetch_all_records(token)
+    records = fetch_all_records(session, token)
     print(f"  共拉取 {len(records)} 条原始记录")
     
     # 3. 按制作状态筛选 + PPT兼职为空跳过 + 转换格式
