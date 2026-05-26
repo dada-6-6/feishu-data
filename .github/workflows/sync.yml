@@ -1,6 +1,7 @@
 name: Sync Feishu Data
 
 on:
+workflow_dispatch:
   schedule:
     # 北京时间 10:00、17:00、21:00（UTC 2:00、9:00、13:00）
     - cron: '0 2 * * *'
