@@ -199,7 +199,7 @@
     "grade": "九年级",
     "quantity": 4,
     "editQuantity": "",
-    "productionStatus": "排版中",
+    "productionStatus": "已完成",
     "allocationStatus": "分配成功",
     "dueDate": "2026-09-18 00:00",
     "qcReviewCompletedDate": "2026-09-19 00:00",
@@ -292,7 +292,7 @@
     "grade": "九年级",
     "quantity": 4,
     "editQuantity": "",
-    "productionStatus": "排版中",
+    "productionStatus": "已完成",
     "allocationStatus": "分配成功",
     "dueDate": "2026-09-18 00:00",
     "qcReviewCompletedDate": "2026-09-19 00:00",
@@ -974,7 +974,7 @@
     "grade": "八年级",
     "quantity": 5,
     "editQuantity": "",
-    "productionStatus": "排版中",
+    "productionStatus": "排版内部驳回待修改",
     "allocationStatus": "分配成功",
     "dueDate": "2026-09-17 00:00",
     "qcReviewCompletedDate": "",
@@ -988,7 +988,7 @@
     "monthQcPrice": "",
     "yearQcPrice": 0.34932677922633,
     "deductedQuestions": "",
-    "inspectionNote": "",
+    "inspectionNote": "题号也都要遮挡\nP12答案不完整，且该题的题目页需拆题拆页带主题干 + 翻页不动版 + 预留 1/3 空白)\nP21答案不完整",
     "commission": 2.5
   },
   {
@@ -1005,7 +1005,7 @@
     "grade": "七年级",
     "quantity": 6,
     "editQuantity": "",
-    "productionStatus": "排版中",
+    "productionStatus": "排版内部驳回待修改",
     "allocationStatus": "分配成功",
     "dueDate": "2026-09-17 00:00",
     "qcReviewCompletedDate": "",
@@ -1019,7 +1019,7 @@
     "monthQcPrice": "",
     "yearQcPrice": 0.34932677922633,
     "deductedQuestions": "",
-    "inspectionNote": "",
+    "inspectionNote": "P24：答案内容较多，建议小题拆分一下，1页1小题\nP10题图带上\nP11：大题干带上，翻页不动版\n题号也需要遮挡",
     "commission": 3
   },
   {
