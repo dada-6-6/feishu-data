@@ -16,9 +16,24 @@ from datetime import datetime, timezone, timedelta
 TZ_CN = timezone(timedelta(hours=8))
 
 # ============ 配置 ============
-# 优先从环境变量读取（GitHub Actions 使用），否则用默认值（本地运行）
-APP_ID = os.environ.get("FEISHU_APP_ID", "cli_a9311133487a9cd2")
-APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "3oaVGDWtehd4wDV7i0dM9d7AQAX3xepB")
+# 凭证从环境变量读取（GitHub Actions 通过 Secrets 注入，仓库是公开的，切勿写死在代码里）
+# 本地运行方式一：设置环境变量 FEISHU_APP_ID / FEISHU_APP_SECRET
+# 本地运行方式二：在脚本同目录放 feishu_local.json（已被 .gitignore 排除，不会提交）：
+#   {"APP_ID": "cli_xxx", "APP_SECRET": "xxx"}
+APP_ID = os.environ.get("FEISHU_APP_ID", "")
+APP_SECRET = os.environ.get("FEISHU_APP_SECRET", "")
+
+if not APP_ID or not APP_SECRET:
+    _local_cfg_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "feishu_local.json")
+    if os.path.exists(_local_cfg_path):
+        try:
+            with open(_local_cfg_path, encoding="utf-8") as f:
+                _cfg = json.load(f)
+            APP_ID = APP_ID or _cfg.get("APP_ID", "")
+            APP_SECRET = APP_SECRET or _cfg.get("APP_SECRET", "")
+        except (OSError, ValueError):
+            pass
+
 APP_TOKEN = "JWV3bVG68aZSN0sr8VecH48Tnqh"
 TABLE_ID = "tblTS9KSxjQeMhGG"
 # 本地路径或 GitHub Actions 的工作目录
@@ -72,6 +87,11 @@ MODIFIED_TIME_FIELDS = {"任务分配时间"}
 # 只拉取以下制作状态的记录（空值也跳过）
 ALLOWED_STATUSES = {"排版中", "已完成", "排版内部驳回待修改"}
 
+# ============ 数据留存窗口 ============
+# 只保留近两个月的记录（本月 + 上月，按“创建时间”判断，北京时间）
+# 更早的记录不再写入 data.json（飞书多维表里的源数据不受影响）
+KEEP_MONTHS = 2
+
 
 def make_session():
     """创建带自动重试的 requests Session（最多重试 3 次，指数退避）"""
@@ -104,7 +124,7 @@ def convert_value(field_name, value):
     """将飞书字段值转换为 data.json 所需格式"""
     if value is None or value == "":
         return ""
-    
+
     # 数组文本字段 [{text: "xxx"}] → "xxx"
     if field_name in ARRAY_TEXT_FIELDS:
         if isinstance(value, list) and value:
@@ -112,7 +132,7 @@ def convert_value(field_name, value):
                 return value[0].get("text", "")
             return str(value[0])
         return ""
-    
+
     # DateTime 字段（毫秒时间戳 → "2026-04-21"，强制 UTC+8）
     if field_name in DATETIME_FIELDS:
         try:
@@ -122,7 +142,7 @@ def convert_value(field_name, value):
             return ""
         except (ValueError, TypeError, OSError):
             return ""
-    
+
     # ModifiedTime 字段（毫秒时间戳 → "2026-04-21"，强制 UTC+8）
     if field_name in MODIFIED_TIME_FIELDS:
         try:
@@ -132,7 +152,7 @@ def convert_value(field_name, value):
             return ""
         except (ValueError, TypeError, OSError):
             return ""
-    
+
     # Number 字段
     if field_name in NUMBER_FIELDS:
         try:
@@ -142,7 +162,7 @@ def convert_value(field_name, value):
             return num
         except (ValueError, TypeError):
             return ""
-    
+
     return value
 
 
@@ -150,33 +170,33 @@ def fetch_all_records(session, token):
     """分页拉取所有记录"""
     url = f"https://open.feishu.cn/open-apis/bitable/v1/apps/{APP_TOKEN}/tables/{TABLE_ID}/records"
     headers = {"Authorization": f"Bearer {token}"}
-    
+
     all_records = []
     page_token = None
     page = 0
-    
+
     while True:
         params = {"page_size": 500, "automatic_fields": False}
         if page_token:
             params["page_token"] = page_token
-        
+
         resp = session.get(url, headers=headers, params=params, timeout=60)
         data = resp.json()
-        
+
         if data.get("code") != 0:
             print(f"[ERROR] 拉取记录失败 (page {page}): {data}")
             sys.exit(1)
-        
+
         items = data["data"].get("items", [])
         all_records.extend(items)
         page += 1
-        
+
         has_more = data["data"].get("has_more", False)
         if not has_more:
             break
         page_token = data["data"].get("page_token")
         print(f"  已拉取 {len(all_records)} 条...")
-    
+
     return all_records
 
 
@@ -184,35 +204,69 @@ def record_to_json(record):
     """将飞书 record 转换为 data.json 格式"""
     fields = record.get("fields", {})
     result = {}
-    
+
     for feishu_name, json_key in FIELD_MAP.items():
         raw_value = fields.get(feishu_name, "")
         result[json_key] = convert_value(feishu_name, raw_value)
-    
+
     return result
+
+
+def get_keep_cutoff():
+    """保留窗口起点：往前回退到第 KEEP_MONTHS 个月的 1 号 00:00（北京时间）
+
+    KEEP_MONTHS=2 时即"上月 1 号"，也就是只保留本月 + 上月的数据。
+    """
+    now = datetime.now(TZ_CN).replace(tzinfo=None)
+    first = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    for _ in range(KEEP_MONTHS - 1):
+        first = (first - timedelta(days=1)).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    return first
+
+
+def is_in_keep_window(date_str, cutoff):
+    """判断记录日期是否在保留窗口内
+
+    date_str 形如 "2026-10-26 15:30"；为空或解析失败时保守起见返回 True（不丢弃）。
+    """
+    if not date_str:
+        return True
+    try:
+        dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+    except ValueError:
+        return True
+    return dt >= cutoff
 
 
 def main():
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 开始同步飞书多维表数据...")
-    
+
+    if not APP_ID or not APP_SECRET:
+        print("[ERROR] 缺少飞书凭证：请设置环境变量 FEISHU_APP_ID / FEISHU_APP_SECRET，"
+              "或在脚本同目录创建 feishu_local.json（内容格式见脚本顶部注释）")
+        sys.exit(1)
+
     # 0. 创建带重试的 session
     session = make_session()
-    
+
     # 1. 获取 token
     print("  获取 token...")
     token = get_tenant_token(session)
     print("  Token OK")
-    
+
     # 2. 拉取记录并筛选
     print("  拉取多维表记录...")
     records = fetch_all_records(session, token)
     print(f"  共拉取 {len(records)} 条原始记录")
-    
-    # 3. 按制作状态筛选 + PPT兼职为空跳过 + 转换格式
+
+    # 3. 按制作状态筛选 + PPT兼职为空跳过 + 只保留近两个月 + 转换格式
     print(f"  筛选状态: {', '.join(ALLOWED_STATUSES)}")
+    cutoff = get_keep_cutoff()
+    print(f"  数据留存窗口: {cutoff.strftime('%Y-%m-%d')} 至今（近 {KEEP_MONTHS} 个月，按创建时间，早于窗口的不再写入）")
     data = []
     skipped_status = 0
     skipped_no_parttimer = 0
+    skipped_old = 0
     for rec in records:
         # 跳过不符合状态的记录
         status = rec.get("fields", {}).get("制作状态", "")
@@ -225,17 +279,21 @@ def main():
             skipped_no_parttimer += 1
             continue
         item = record_to_json(rec)
+        # 跳过留存窗口之外的旧记录
+        if not is_in_keep_window(item.get("createdAt", ""), cutoff):
+            skipped_old += 1
+            continue
         data.append(item)
-    
-    print(f"  筛选后剩余 {len(data)} 条（跳过状态不符 {skipped_status} 条，PPT兼职为空 {skipped_no_parttimer} 条）")
-    
+
+    print(f"  筛选后剩余 {len(data)} 条（跳过状态不符 {skipped_status} 条，PPT兼职为空 {skipped_no_parttimer} 条，超出留存窗口 {skipped_old} 条）")
+
     # 4. 写入文件
     output_dir = os.path.dirname(OUTPUT_PATH)
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-    
+
     print(f"  已写入 {OUTPUT_PATH} ({len(data)} 条)")
     print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] 同步完成！")
 
